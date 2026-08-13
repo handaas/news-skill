@@ -1,0 +1,4 @@
+interface:
+  display_name: "舆情大数据报告"
+  short_description: "基于 HandaaS 舆情大数据 MCP，生成舆情情感统计（4类情感+趋势）/ 舆情明细列表的专业 HTML / Markdown / JSON 报告。"
+  default_prompt: "使用 $news-report 生成「企业名称」的舆情大数据报告：自动补全企业全称，调用舆情 MCP 工具，产出 HTML + Markdown + JSON 三件套。"
