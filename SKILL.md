@@ -1,6 +1,6 @@
 ---
 name: news-report
-description: Use for generating a professional news big-data report (舆情大数据报告) from the HandaaS news MCP — covering 舆情情感统计（4类情感+趋势）、舆情明细列表. Trigger when users ask for “舆情大数据报告”, “舆情分析报告”, “查一家公司的舆情”, “企业舆情监控”, “舆情统计”, “舆情明细”, “负面舆情”, “品牌声誉报告”, or “舆情趋势”. Infer the canonical enterprise name (auto-fuzzy-completing a keyword), pick the right MCP tools, and produce HTML + Markdown + JSON reports automatically.
+description: Use for generating a professional news big-data report (舆情大数据报告) from the HandaaS news MCP — covering 舆情情感统计（4类情感+趋势）、舆情明细列表. Trigger when users ask for “舆情大数据报告”, “舆情分析报告”, “查一家公司的舆情”, “企业舆情监控”, “舆情统计”, “舆情明细”, “负面舆情”, “品牌声誉报告”, or “舆情趋势”. Infer the canonical enterprise name (auto-fuzzy-completing a keyword), pick the right MCP tools, and produce HTML + Markdown + JSON reports automatically. MCP 服务名称触发词：企业舆情洞察。
 ---
 
 # 舆情大数据报告
@@ -28,6 +28,8 @@ description: Use for generating a professional news big-data report (舆情大�
 
 ## MCP 服务入口
 
+- MCP 服务当前名称：企业舆情洞察（连接仍使用原服务目录标识）。
+
 - 上游 MCP 项目：`handaas-mcp-server/news-mcp-server`（位于 `HANDAAS_MCP_SERVER_ROOT` 或本仓库同级目录）。
 - Remote MCP：设置环境变量 `NEWS_MCP_URL`（streamable-http），可选 `NEWS_MCP_TOKEN`。
 - 本地 MCP：设置 `HANDAAS_MCP_SERVER_ROOT` 指向 `handaas-mcp-server` 仓库根目录；该 server 自己的 `.env` 提供 `INTEGRATOR_ID` / `SECRET_ID` / `SECRET_KEY`。
@@ -37,6 +39,17 @@ description: Use for generating a professional news big-data report (舆情大�
 
 - 不清楚该 MCP 有哪些工具、参数、返回字段、何时调用：`references/mcp-tools-reference.md`。
 - 报告结构、章节、质量底线、渲染工作流：`references/report-output.md`。
+
+## 付费调用与预算约束（必读）
+
+1. 每次业务工具调用与每次明细翻页都可能计费；想要 total/页数只是为了精确规划，不构成默认全量拉取的授权。
+2. 调用前先推演所需结论与数据维度，确定工具/参数计划、必要页数与最大调用预算。total 未知时，第一个必要明细页既是数据又是 total 探测，绝不为此重复付费。
+3. 优先用统计/聚合接口（`news_bigdata_news_stats`）回答问题；只在结论、图表、代表记录或明确全量/计数需求确实需要时取舆情明细。只有确实要求综合报告时才跑完整流水线，绝不因为工具存在就全部调用。
+4. 用 schema 允许的最大合理 pageSize 取所需行数，证据/样本目标满足即停，且不超过明确预算。更多调用必须有具体缺失结论支撑，不因为"补齐所有章节"而追加；不得用样本分布冒充全量结论。预算不足以支撑关键结论时，先说明证据缺口与预计额外调用数，等明确授权后再扩大——不得静默降级结论，也不得静默扩大计费范围。
+5. 当前任务/报告内复用相同请求（含第一页规划数据）：同一 tool+相同参数只调用一次；不要为渲染重跑 compose/MCP——用已保存 JSON 本地重渲染；不得自动重试、重复取统计/明细或并行获取相同数据；补充查询先列明缺口并复用已返回记录。
+6. `total_pages`/`remaining_pages` 是按请求 pageSize 的估算；短但非空的页仍有剩余记录时在预算内继续。只有稳定有效 total 与实际扫描数一致才算完整采集；报错、提前空页、重复页、total 变更/缺失、数量溢出均为不完整。显式预算或样本目标停止即部分采集，绝不宣称全量。不调用无关或不必要维度的工具。
+
+本 skill 分页明细接口：`news_bigdata_news_list`（舆情明细，pageSize≤50），预算经 `--max-pages`（默认 1）传递；`news_bigdata_news_stats` 与模糊补全 `news_bigdata_fuzzy_search` 为单次调用，不进入分页预算。
 
 ## 意图路由
 
@@ -77,6 +90,7 @@ python scripts/compose_report.py \
 # 真实查询 + 渲染（需 MCP 连接就绪）
 python scripts/compose_report.py \
   --enterprise "示例科技有限公司" \
+  --max-pages 1 \
   --output output/news.json \
   --report-output output/news.html
 

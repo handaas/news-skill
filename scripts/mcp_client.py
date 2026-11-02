@@ -5,7 +5,7 @@ Connects to the upstream HandaaS MCP server in two ways:
 
 1. **Remote MCP (preferred)** — set ``NEWS_MCP_URL`` (or the generic
    ``HANDAAS_MCP_URL``) to a streamable-http endpoint. A token may be supplied
-   via ``NEWS_MCP_TOKEN`` / ``HANDAAS_MCP_TOKEN``.
+   via ``NEWS_MCP_TOKEN``.
 2. **Local MCP (fallback)** — when no URL is configured, the client boots the
    local ``handaas-mcp-server/news-mcp-server/server/mcp_server.py`` over
    stdio using the MCP SDK. The local server reads its own ``.env`` for
@@ -33,11 +33,9 @@ from typing import Any, Dict, Optional
 from common import (
     DOMAIN_UPPER,
     MCP_SERVER_DIR,
-    REPORT_TYPE,
     ConfigError,
     env,
     is_placeholder,
-    json_dumps,
     load_config,
     print_json,
     redact,
@@ -56,7 +54,7 @@ def resolve_mcp_url() -> Optional[str]:
 
 
 def resolve_mcp_token() -> Optional[str]:
-    token = env(f"{DOMAIN_UPPER}_MCP_TOKEN", "HANDAAS_MCP_TOKEN")
+    token = env(f"{DOMAIN_UPPER}_MCP_TOKEN")
     if not token or is_placeholder(token):
         return None
     return token
@@ -110,6 +108,9 @@ def _plain(value: Any) -> Any:
 def _extract_tool_result(value: Any) -> Any:
     plain = _plain(value)
     if isinstance(plain, dict):
+        # MCP CallToolResult failure state takes precedence over any content.
+        if plain.get("isError") is True or plain.get("is_error") is True:
+            return {"_error": "MCP tool call failed"}
         structured = plain.get("structuredContent") or plain.get("structured_content")
         if structured is not None:
             if isinstance(structured, dict) and set(structured.keys()) == {"result"}:

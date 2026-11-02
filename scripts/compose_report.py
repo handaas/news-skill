@@ -21,10 +21,9 @@ import argparse
 import datetime as dt
 import json
 import pathlib
-import sys
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Dict, List, Mapping, Optional, Sequence
 
-from common import REPORT_BANNER, REPORT_TYPE, json_dumps, load_json_file, print_json
+from common import REPORT_BANNER, REPORT_TYPE, attach_pagination, call_tool_once, collect_detail_pages, die, json_dumps, load_json_file, paid_call_scope, print_json
 import mcp_client
 from render_report import render_html, render_markdown, html_to_pdf
 
@@ -45,39 +44,118 @@ SENTIMENT_KEYS = {"negative": "负面", "positive": "正面", "neutral": "中性
 # --------------------------------------------------------------------------- #
 
 
-def _is_api_error(value: Any) -> bool:
-    """Detect MCP API error responses (not empty data, but actual failures like 405)."""
-    if value is None:
-        return False
+def _is_empty_response(value: Any) -> bool:
+    if value is None or value == "" or value == {}:
+        return True
     if isinstance(value, str):
-        return any(s in value for s in ("接口调用失败", "查询失败", "状态码：4", "状态码：5"))
+        text = value.strip().lower()
+        return any(token in text for token in ("查询数据为空", "暂无数据", "未查询到", "未检索到", "no data"))
     if isinstance(value, dict):
-        for v in value.values():
-            if isinstance(v, str) and any(s in v for s in ("接口调用失败", "查询失败", "状态码：4", "状态码：5")):
+        for key in ("text", "message", "msg"):
+            if key in value and _is_empty_response(value.get(key)):
                 return True
+        containers = [value.get(key) for key in ("resultList", "list", "items", "data") if key in value]
+        if containers and all(item in (None, [], {}) for item in containers):
+            total = value.get("total")
+            return total in (None, 0, "0")
     return False
 
+
+def _is_api_error(value: Any) -> bool:
+    """Return True only for failed calls; platform empty-data text is not an error."""
+    if value is None or _is_empty_response(value):
+        return False
+    if isinstance(value, str):
+        text = value.lower()
+        return any(token in text for token in (
+            "接口调用失败", "查询失败", "状态码：4", "状态码：5",
+            "upstream timeout", "tool failed", "unauthorized", "forbidden",
+        ))
+    if isinstance(value, dict):
+        if value.get("isError") is True or value.get("is_error") is True or value.get("success") is False:
+            return True
+        if any(value.get(key) not in (None, "", False) for key in ("_error", "error")):
+            return True
+        code = value.get("code")
+        if code not in (None, 0, "0", 200, "200", 10001, "10001"):
+            return True
+        return any(_is_api_error(value.get(key)) for key in ("text", "message", "msg") if key in value)
+    return False
+
+
 def _first_list(value: Any) -> List[Any]:
+    if _is_api_error(value) or _is_empty_response(value):
+        return []
     if isinstance(value, list):
         return value
     if isinstance(value, dict):
-        if _is_api_error(value):
-            return []
-        for key in ("resultList", "list", "items", "data"):
+        for key in ("resultList", "list", "items"):
             if isinstance(value.get(key), list):
                 return value[key]
-    if value in (None, "", {}):
-        return []
-    return [value]
+        nested = value.get("data")
+        if isinstance(nested, list):
+            return nested
+        if isinstance(nested, dict):
+            return _first_list(nested)
+    return []
 
 
 def _first_record(value: Any) -> Dict[str, Any]:
+    if _is_api_error(value) or _is_empty_response(value):
+        return {}
     for record in _first_list(value):
-        if isinstance(record, dict):
+        if isinstance(record, dict) and _has_evidence(record):
             return record
     if isinstance(value, dict):
-        return value
+        envelope = {"resultList", "list", "items", "data", "total", "pageNo", "pageSize", "text", "message", "msg", "code"}
+        if not set(value).issubset(envelope) and _has_evidence(value):
+            return value
     return {}
+
+
+def _has_evidence(value: Any) -> bool:
+    if value is None or value == "" or value == "-":
+        return False
+    if _is_api_error(value) or _is_empty_response(value):
+        return False
+    if isinstance(value, dict):
+        return any(_has_evidence(item) for key, item in value.items() if key not in {"total", "pageNo", "pageSize"})
+    if isinstance(value, (list, tuple, set)):
+        return any(_has_evidence(item) for item in value)
+    return True
+
+
+def _meaningful_row(row: Mapping[str, Any]) -> bool:
+    return any(_has_evidence(value) for value in row.values())
+
+
+def _attach_call_status(report: Dict[str, Any], calls: Mapping[str, Any]) -> Dict[str, Any]:
+    """Disclose failed and genuine-empty domains without exposing upstream details."""
+    failed = [name for name, payload in calls.items() if _is_api_error(payload)]
+    empty = [name for name, payload in calls.items() if not _is_api_error(payload) and _is_empty_response(payload)]
+    source = report.setdefault("data_source", {})
+    source["failed_products"] = failed
+    source["empty_products"] = empty
+    return report
+
+
+def _apply_resolution_limit(report: Dict[str, Any], resolved: Mapping[str, Any]) -> Dict[str, Any]:
+    subject = report.setdefault("subject", {})
+    subject["resolved"] = False
+    subject["requires_confirmation"] = True
+    subject["resolve_reason"] = resolved.get("reason", "主体未唯一确认")
+    subject["candidate_sample"] = list(resolved.get("candidate_sample") or [])
+    if resolved.get("fuzzy_total") is not None:
+        subject["fuzzy_total"] = resolved.get("fuzzy_total")
+    message = "输入未唯一确认到特定企业；已停止主体专属数据调用，不生成该企业的经营、风险或舆情评价。请使用候选企业全称或企业标识重试。"
+    report["abstract"] = message
+    report["summary"] = message
+    report["executive_summary"] = [message]
+    report["metrics"] = []
+    report["representative_records"] = []
+    report["insights"] = [{"feature": "主体确认受限", "evidence": subject["resolve_reason"], "interpretation": message}]
+    report.setdefault("data_source", {})["subject_resolution"] = "confirmation_required"
+    return report
 
 
 def _text(value: Any, limit: int = 0) -> str:
@@ -102,7 +180,7 @@ def _int(value: Any) -> Optional[int]:
 
 def _safe_call(tool: str, arguments: Dict[str, Any]) -> Any:
     try:
-        result = mcp_client.call_tool(tool, arguments)
+        result = call_tool_once(mcp_client.call_tool, tool, arguments)
         # Detect API error responses (405, etc.) and return error marker
         if _is_api_error(result):
             return {"_error": "API错误", "_raw": result}
@@ -130,20 +208,48 @@ def _is_error(payload: Any) -> bool:
 def resolve_enterprise_name(raw: str) -> Dict[str, Any]:
     raw = (raw or "").strip()
     if not raw:
-        return {"keyword": "", "enterprise": "", "resolved": False, "reason": "关键词为空"}
-    if any(suffix in raw for suffix in ("公司", "集团", "有限", "院", "厂", "中心", "事务所", "合作社", "合伙")):
-        return {"keyword": raw, "enterprise": raw, "resolved": True, "reason": "视为企业全称"}
-    fuzzy = _safe_call(T_FUZZY, {"matchKeyword": raw, "pageSize": 1})
-    record = _first_record(fuzzy)
-    name = str(record.get("name") or "").strip()
-    if name:
-        return {"keyword": raw, "enterprise": name, "resolved": True, "reason": "由关键词模糊查询补全", "fuzzy_total": _int(_safe_total(fuzzy)), "record": record}
-    return {"keyword": raw, "enterprise": raw, "resolved": False, "reason": "模糊查询未命中企业全称，按关键词直查"}
+        return {"keyword": "", "enterprise": "", "resolved": False, "requires_confirmation": True, "reason": "关键词为空", "candidate_sample": []}
+    # A full legal-name-looking input is already an explicit subject selection.
+    if any(suffix in raw for suffix in ("公司", "有限", "院", "厂", "中心", "事务所", "合作社", "合伙")):
+        return {"keyword": raw, "enterprise": raw, "resolved": True, "requires_confirmation": False, "reason": "用户提供企业全称", "candidate_sample": []}
+
+    fuzzy = _safe_call(T_FUZZY, {"matchKeyword": raw, "pageSize": 10})
+    records = [item for item in _first_list(fuzzy) if isinstance(item, dict)]
+    total = _int(_safe_total(fuzzy))
+    id_keys = ("nameId", "id", "enterpriseId", "regNumber", "socialCreditCode")
+    exact = [
+        item for item in records
+        if raw == str(item.get("name") or "").strip()
+        or any(raw == str(item.get(key) or "").strip() for key in id_keys)
+    ]
+    if len(exact) == 1:
+        record = exact[0]
+        name = str(record.get("name") or raw).strip()
+        return {"keyword": raw, "enterprise": name, "resolved": True, "requires_confirmation": False, "reason": "与候选企业全称或标识精确匹配", "fuzzy_total": total, "record": record, "candidate_sample": []}
+    if len(records) == 1 and total == 1:
+        record = records[0]
+        name = str(record.get("name") or "").strip()
+        if name:
+            return {"keyword": raw, "enterprise": name, "resolved": True, "requires_confirmation": False, "reason": "模糊查询唯一命中", "fuzzy_total": total, "record": record, "candidate_sample": []}
+
+    candidates = []
+    for item in records[:5]:
+        candidate = {"name": str(item.get("name") or "").strip()}
+        for key in id_keys:
+            if item.get(key) not in (None, ""):
+                candidate[key] = str(item.get(key))
+        if candidate.get("name") or len(candidate) > 1:
+            candidates.append(candidate)
+    if candidates:
+        reason = f"模糊查询命中 {total if total is not None else '多个'} 个候选，未唯一确认主体"
+    else:
+        reason = "模糊查询未唯一命中企业，需提供企业全称或企业标识"
+    return {
+        "keyword": raw, "enterprise": raw, "resolved": False, "requires_confirmation": True,
+        "reason": reason, "fuzzy_total": total, "candidate_sample": candidates,
+    }
 
 
-# --------------------------------------------------------------------------- #
-# Enterprise profile helpers (from fuzzy_search record)
-# --------------------------------------------------------------------------- #
 
 def _extract_profile(record: Dict[str, Any]) -> Dict[str, Any]:
     """Extract enterprise profile fields from a fuzzy_search record."""
@@ -199,7 +305,6 @@ def _enrich_metrics_with_profile(metrics: List[Dict[str, Any]], record: Any) -> 
 def _derive_core_metrics(metrics: List[Dict[str, Any]], core: Mapping[str, Any]) -> List[Dict[str, Any]]:
     """Derive additional metrics from core analysis sections."""
     detail = core.get("news_list", []) if isinstance(core, dict) else []
-    stats = core.get("news_stats", {}) if isinstance(core, dict) else {}
     if isinstance(detail, list) and detail:
         try:
             sources = set(str(r.get("来源", "")) for r in detail if r.get("来源"))
@@ -232,11 +337,12 @@ def build_subject(raw: str, resolved: Mapping[str, Any], keyword_type: str, sent
     }
 
 
-def build_metrics(stats: Mapping[str, Any], list_total: Any, core: Mapping[str, Any] = None) -> List[Dict[str, Any]]:
+def build_metrics(stats: Mapping[str, Any], list_total: Any, core: Optional[Mapping[str, Any]] = None) -> List[Dict[str, Any]]:
     metrics: List[Dict[str, Any]] = []
     core = core or {}
     s = stats if isinstance(stats, dict) and not _is_error(stats) else {}
-    sentiment_stats = s.get("newsSentimentStats") if isinstance(s.get("newsSentimentStats"), dict) else {}
+    raw_sentiment_stats = s.get("newsSentimentStats")
+    sentiment_stats: Mapping[str, Any] = raw_sentiment_stats if isinstance(raw_sentiment_stats, dict) else {}
     # compute total of all sentiment counts for share deltas
     sent_total = 0.0
     parsed: Dict[str, Any] = {}
@@ -272,16 +378,17 @@ def build_caliber(subject: Mapping[str, Any], sentiment: Optional[int]) -> Dict[
         "match_type": f"舆情数据按企业主体匹配（keywordType={subject.get('keywordType', 'name')}）；明细支持 sentimentLabel 情感过滤{sentiment_hint}",
         "data_scope": "舆情情感统计（4类情感+趋势）、舆情明细列表",
         "products": ["舆情统计", "舆情明细", "关键词模糊查询企业"],
-        "limit": "数据来自公开新闻舆情；情感分布与趋势可能受数据源覆盖与更新延迟影响。",
+        "limit": "数据来自公开新闻舆情；情感分布与趋势可能受数据源覆盖、更新延迟、通稿转载及重复收录影响，报告未将媒体条数等同于独立事件数。",
     }
 
 
 def build_core_analysis(stats: Mapping[str, Any], news_list: Any, sentiment: Optional[int], subject_name: str = "") -> Dict[str, Any]:
-    s = stats if isinstance(stats, dict) and not _is_error(stats) else {}
+    s: Mapping[str, Any] = stats if isinstance(stats, dict) and not _is_error(stats) else {}
 
     # 舆情统计 KV
     stats_kv: Dict[str, Any] = {}
-    sentiment_stats = s.get("newsSentimentStats") if isinstance(s.get("newsSentimentStats"), dict) else {}
+    raw_sentiment_stats = s.get("newsSentimentStats")
+    sentiment_stats: Mapping[str, Any] = raw_sentiment_stats if isinstance(raw_sentiment_stats, dict) else {}
     for key in ("positive", "negative", "neutral", "unknown"):
         val = sentiment_stats.get(key)
         if val is not None:
@@ -304,10 +411,12 @@ def build_core_analysis(stats: Mapping[str, Any], news_list: Any, sentiment: Opt
     if isinstance(news_trend, dict):
         months = news_trend.get("month")
         if isinstance(months, list):
-            stats_list = news_trend.get("stats") if isinstance(news_trend.get("stats"), list) else []
+            raw_stats_list = news_trend.get("stats")
+            stats_list: List[Any] = raw_stats_list if isinstance(raw_stats_list, list) else []
             for idx, m in enumerate(months):
                 row = {"周期/月份": _text(m)}
-                stats_item = stats_list[idx] if idx < len(stats_list) else {}
+                raw_stats_item = stats_list[idx] if idx < len(stats_list) else {}
+                stats_item: Mapping[str, Any] = raw_stats_item if isinstance(raw_stats_item, dict) else {}
                 if isinstance(stats_item, dict):
                     for k, lbl in (("negative", "负面"), ("positive", "正面")):
                         if stats_item.get(k) is not None:
@@ -317,7 +426,8 @@ def build_core_analysis(stats: Mapping[str, Any], news_list: Any, sentiment: Opt
         for ti in news_trend:
             if isinstance(ti, dict):
                 row = {"周期/月份": _text(ti.get("month"))}
-                stats_item = ti.get("stats") if isinstance(ti.get("stats"), dict) else {}
+                raw_stats_item = ti.get("stats")
+                stats_item = raw_stats_item if isinstance(raw_stats_item, dict) else {}
                 for k, lbl in (("negative", "负面"), ("positive", "正面")):
                     if stats_item.get(k) is not None:
                         row[lbl] = _text(stats_item.get(k))
@@ -340,7 +450,7 @@ def build_core_analysis(stats: Mapping[str, Any], news_list: Any, sentiment: Opt
             "标题": title,
             "来源": _text(item.get("newsSource") or item.get("source")) or "-",
             "发布时间": _text(item.get("newsPublishTime") or item.get("publishTime")) or "-",
-            "情感": SENTIMENT_LABELS.get(label_int, _text(item.get("sentimentLabel"))) if item.get("sentimentLabel") is not None else "-",
+            "情感": SENTIMENT_LABELS.get(label_int, _text(item.get("sentimentLabel"))) if label_int is not None else "-",
             "链接": link or "-",
             "简介": _text(item.get("newsBrief") or item.get("brief"), limit=80) or "-",
         })
@@ -358,9 +468,29 @@ def build_core_analysis(stats: Mapping[str, Any], news_list: Any, sentiment: Opt
     related_rows = [{"关联企业": k, "共现次数": v} for k, v in sorted(related_counter.items(), key=lambda x: x[1], reverse=True)]
     source_rows = [{"媒体来源": k, "报道数量": v} for k, v in sorted(source_counter.items(), key=lambda x: x[1], reverse=True)]
 
+    filter_validation: Dict[str, Any] = {}
+    if sentiment is not None:
+        returned_labels = [_int(item.get("sentimentLabel")) for item in _first_list(news_list) if isinstance(item, dict)]
+        mismatches = sum(1 for label in returned_labels if label is not None and label != sentiment)
+        stat_key = {0: "negative", 1: "positive", 2: "neutral", 3: "unknown"}.get(sentiment)
+        stats_total = sentiment_stats.get(stat_key) if stat_key else None
+        filter_validation = {
+            "请求情感": f"{sentiment}（{SENTIMENT_LABELS.get(sentiment, '未知枚举')}）",
+            "筛选状态": "返回记录含非目标情感" if mismatches else "归纳记录符合筛选枚举",
+            "非目标记录数": mismatches,
+            "列表命中总数": total if total is not None else "-",
+            "统计口径对应数量": stats_total if stats_total is not None else "-",
+            "统计口径": (
+                "过滤失败：返回标签与筛选条件冲突，列表总量不可替代分类统计" if mismatches
+                else "口径不一致，列表总量不可替代情感统计" if total is not None and stats_total is not None and str(total) != str(stats_total)
+                else "总量暂未发现冲突，但仍不代表过滤语义与统计口径完全一致"
+            ),
+        }
+
     note_suffix = f"；sentimentLabel={sentiment}（{SENTIMENT_LABELS.get(sentiment, '')}）" if sentiment is not None else ""
     sections = [
         {"key": "news_statistics", "title": "舆情统计", "kind": "kv", "note": "4类情感（正/负/中/未知）总量分布"},
+        {"key": "filter_validation", "title": "情感筛选口径核验", "kind": "kv", "note": "核验请求枚举、返回记录标签与统计总量，不将冲突口径强行合并"},
         {"key": "sentiment_dist", "title": "舆情情感分布", "kind": "pie", "note": "4类情感数量占比",
          "chart": {"name": "类别", "value": "数量", "donut": True}, "columns": [("类别", "类别"), ("数量", "数量")]},
         {"key": "sentiment_trend", "title": "舆情情感趋势", "kind": "multi_line", "note": "按月份统计正面/负面情感走势（上游逐月数据暂不含中性，故仅展示正/负两条线）",
@@ -378,6 +508,7 @@ def build_core_analysis(stats: Mapping[str, Any], news_list: Any, sentiment: Opt
     return {
         "sections": sections,
         "news_statistics": stats_kv,
+        "filter_validation": filter_validation,
         "sentiment_dist": sentiment_dist,
         "sentiment_trend": trend_rows,
         "related_enterprises": related_rows,
@@ -439,7 +570,7 @@ def _concentration(rows: List[Mapping[str, Any]], top_n: int = 3, name_key: str 
     return {"top": items[0][0], "top_share": items[0][1] / total * 100, "cr": cr, "total": total}
 
 
-def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
+def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: Sequence[Mapping[str, Any]]) -> List[Dict[str, Any]]:
     insights: List[Dict[str, Any]] = []
     metric_map = {m["label"]: str(m["value"]) for m in metrics}
     stats_kv = core.get("news_statistics") or {}
@@ -465,7 +596,7 @@ def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics:
         insights.append({
             "feature": "情感结构",
             "evidence": "、".join(ev_parts) + "。" + pos_share + ratio,
-            "interpretation": "正负情感比例反映企业公众形象与声誉健康度；负面占比偏高时建议结合明细核查潜在舆情风险。",
+            "interpretation": "正负情感比例仅描述算法标签分布；需结合原文核验，不能直接等同于公众形象或声誉健康度。",
         })
     if metric_map.get("舆情明细数"):
         insights.append({
@@ -482,7 +613,7 @@ def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics:
         insights.append({
             "feature": "中性占比",
             "evidence": f"中性舆情 {neu} 条{neu_share}。",
-            "interpretation": "中性舆情占比较高说明信息传播以事实陈述为主，品牌观点渗透仍有提升空间。",
+            "interpretation": "中性仅是情感模型分类，不足以证明报道为事实陈述，也不能据此评价品牌传播效果。",
         })
     # 负面情感趋势研判（multi-line 中负面序列）
     trend_rows = core.get("sentiment_trend") or []
@@ -503,7 +634,7 @@ def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics:
             insights.append({
                 "feature": "关联企业共现",
                 "evidence": f"共出现 {len(related)} 家关联企业，合计共现 {total_co} 次；其中“{conc['top']}”共现最多（占比约 {conc['top_share']:.0f}%），前 3 家合计 {conc['cr']:.0f}%（CR3）。",
-                "interpretation": "关联企业共现反映企业在舆论中的产业关联与生态网络；高频共现企业通常是产业链上下游、合作伙伴或竞争对手，可用于关联图谱构建与同业比较。",
+                "interpretation": "共现只表示实体出现在同一报道样本中，不能据此认定上下游、合作或竞争关系。",
             })
     # 媒体来源集中度
     sources = core.get("news_source") or []
@@ -513,8 +644,14 @@ def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics:
             insights.append({
                 "feature": "媒体来源分布",
                 "evidence": f"报道来自 {len(sources)} 家媒体，其中“{conc['top']}”报道最多（占比约 {conc['top_share']:.0f}%）。",
-                "interpretation": "媒体来源分布反映舆情传播渠道；来源越分散说明信息覆盖面越广、可信度较高，过度集中于单一渠道则需关注信息源偏差。",
+                "interpretation": "媒体来源分布只描述样本渠道覆盖，来源数量或分散程度不等同于内容可信度。",
             })
+    if core.get("news_list"):
+        insights.append({
+            "feature": "转载与事件去重限制",
+            "evidence": "列表与总量未按事件去重，同题转载可能重复计数。",
+            "interpretation": "媒体条数不等于独立新闻事件数；需要按标题、正文、时间与原始链接另行去重后再做事件级判断。",
+        })
     if not insights:
         insights.append({
             "feature": "数据完整性",
@@ -524,7 +661,7 @@ def build_insights(subject: Mapping[str, Any], core: Mapping[str, Any], metrics:
     return insights
 
 
-def build_abstract(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: List[Mapping[str, Any]]) -> str:
+def build_abstract(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: Sequence[Mapping[str, Any]]) -> str:
     name = subject.get("enterprise") or subject.get("match_raw") or "目标企业"
     parts = [f"本报告以“{name}”为分析对象，基于公开新闻舆情数据，系统呈现企业舆情情感统计（4类情感+趋势）与舆情明细列表。"]
     if metrics:
@@ -555,7 +692,7 @@ def build_dry_run_payload(raw: str, keyword_type: str, sentiment: Optional[int])
 # Assembly
 # --------------------------------------------------------------------------- #
 
-def _assemble(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: List[Mapping[str, Any]], *, dry_run: bool, sentiment: Optional[int]) -> Dict[str, Any]:
+def _assemble(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: Sequence[Mapping[str, Any]], *, dry_run: bool, sentiment: Optional[int]) -> Dict[str, Any]:
     abstract = build_abstract(subject, core, metrics)
     records = build_records(core)
     insights = build_insights(subject, core, metrics)
@@ -564,10 +701,10 @@ def _assemble(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: List
     secs = ca.get("sections", [])
     if secs:
         total_secs = len(secs)
-        populated = sum(1 for s in secs if isinstance(s, dict) and ca.get(s.get("key")) not in (None, "", [], {}))
+        populated = sum(1 for s in secs if isinstance(s, dict) and _has_evidence(ca.get(s.get("key"))))
     else:
         total_secs = max(1, len([k for k in ca if k != "sections"]))
-        populated = sum(1 for k in ca if k != "sections" and ca.get(k) not in (None, "", [], {}))
+        populated = sum(1 for k in ca if k != "sections" and _has_evidence(ca.get(k)))
     quality_report = {
         "total_sections": total_secs,
         "populated_sections": populated,
@@ -605,17 +742,27 @@ def _assemble(subject: Mapping[str, Any], core: Mapping[str, Any], metrics: List
     }
 
 
-def build_payload(raw: str, keyword_type: str, sentiment: Optional[int], page_size: int) -> Dict[str, Any]:
+@paid_call_scope
+def build_payload(raw: str, keyword_type: str, sentiment: Optional[int], page_size: int, max_pages: int = 1) -> Dict[str, Any]:
+    if isinstance(max_pages, bool) or not isinstance(max_pages, int) or max_pages < 1:
+        raise ValueError("max_pages 必须为正整数")
     resolved = resolve_enterprise_name(raw)
+    if resolved.get("requires_confirmation"):
+        subject = build_subject(raw, resolved, keyword_type, sentiment)
+        return _apply_resolution_limit(_assemble(subject, {"sections": []}, [], dry_run=False, sentiment=sentiment), resolved)
     enterprise = resolved["enterprise"]
     mk_args: Dict[str, Any] = {"matchKeyword": enterprise, "keywordType": keyword_type}
 
     stats = _safe_call(T_STATS, mk_args)
 
-    list_args: Dict[str, Any] = {"matchKeyword": enterprise, "keywordType": keyword_type, "pageIndex": 1, "pageSize": page_size}
+    list_args: Dict[str, Any] = {"matchKeyword": enterprise, "keywordType": keyword_type, "pageSize": page_size}
     if sentiment is not None:
         list_args["sentimentLabel"] = sentiment
-    news_list = _safe_call(T_LIST, list_args)
+    news_list = collect_detail_pages(
+        _safe_call, T_LIST, list_args,
+        get_rows=_first_list, get_total=_safe_total, is_error=_is_api_error,
+        max_pages=max_pages,
+    )
     list_total = _safe_total(news_list) if isinstance(news_list, dict) else None
 
     subject = build_subject(raw, resolved, keyword_type, sentiment)
@@ -624,7 +771,9 @@ def build_payload(raw: str, keyword_type: str, sentiment: Optional[int], page_si
     _derive_core_metrics(metrics, core if isinstance(core, dict) else {})
     # --- Enterprise profile enrichment (from fuzzy_search) ---
     _enrich_metrics_with_profile(metrics, resolved.get("record") if isinstance(resolved, dict) else None)
-    return _assemble(subject, core, metrics, dry_run=False, sentiment=sentiment)
+    report = _assemble(subject, core, metrics, dry_run=False, sentiment=sentiment)
+    report = _attach_call_status(report, {"舆情统计": stats, "舆情明细": news_list})
+    return attach_pagination(report, {"舆情明细": news_list})
 
 
 # --------------------------------------------------------------------------- #
@@ -637,16 +786,21 @@ def main() -> None:
     parser.add_argument("--keyword-type", default="name", help="主体类型：name/nameId/regNumber/socialCreditCode")
     parser.add_argument("--sentiment", type=int, default=None, choices=[0, 1, 2, 3], help="舆情明细情感过滤：0=负面/1=正面/2=中性/3=未知")
     parser.add_argument("--page-size", type=int, default=50, help="舆情明细分页大小（最多 50）")
+    parser.add_argument("--max-pages", type=int, default=1, help="舆情明细最多付费翻页数（默认 1；仅在明确需要更多结论/证据时增大）")
     parser.add_argument("--dry-run", action="store_true", help="不调用真实 MCP，使用样例数据组装报告骨架")
     parser.add_argument("--output", help="输出 JSON 路径；省略则打印到 stdout")
     parser.add_argument("--report-output", help="同时输出 HTML 报告（.html）与 Markdown 报告（.md）")
     parser.add_argument("--pdf-output", help="额外输出 PDF 报告（.pdf）；需要 Playwright + Chromium")
     args = parser.parse_args()
 
+    if not args.dry_run:
+        if args.max_pages is not None and args.max_pages < 1:
+            die("--max-pages 必须为正整数")
+
     if args.dry_run:
         payload = build_dry_run_payload(args.enterprise, args.keyword_type, args.sentiment)
     else:
-        payload = build_payload(args.enterprise, args.keyword_type, args.sentiment, args.page_size)
+        payload = build_payload(args.enterprise, args.keyword_type, args.sentiment, args.page_size, args.max_pages)
 
     if args.output:
         out = pathlib.Path(args.output).expanduser()
