@@ -1,0 +1,130 @@
+[
+  {
+    "tool": "news_bigdata_news_stats",
+    "domain": null,
+    "arguments": {
+      "matchKeyword": "贵州茅台酒股份有限公司",
+      "keywordType": "name"
+    },
+    "invocation_id": "1793069167207259000",
+    "elapsed_seconds": 1.758,
+    "status": "data",
+    "error_category": null,
+    "result_type": "dict",
+    "top_level_fields": [
+      "newsSentimentStats",
+      "newsSentimentTrend",
+      "sentimentLabelList"
+    ],
+    "row_count": null,
+    "reported_total": null,
+    "numeric_evidence": [
+      {
+        "path": "newsSentimentStats.negative",
+        "value": 632
+      },
+      {
+        "path": "newsSentimentStats.neutral",
+        "value": 2851
+      },
+      {
+        "path": "newsSentimentStats.positive",
+        "value": 776
+      },
+      {
+        "path": "newsSentimentStats.unknown",
+        "value": 28
+      },
+      {
+        "path": "newsSentimentTrend[0].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[0].stats.positive",
+        "value": 1
+      },
+      {
+        "path": "newsSentimentTrend[1].stats.negative",
+        "value": 1
+      },
+      {
+        "path": "newsSentimentTrend[1].stats.positive",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[2].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[2].stats.positive",
+        "value": 4
+      },
+      {
+        "path": "newsSentimentTrend[3].stats.negative",
+        "value": 3
+      },
+      {
+        "path": "newsSentimentTrend[3].stats.positive",
+        "value": 2
+      },
+      {
+        "path": "newsSentimentTrend[4].stats.negative",
+        "value": 1
+      },
+      {
+        "path": "newsSentimentTrend[4].stats.positive",
+        "value": 0
+      }
+    ],
+    "response_sha256": "7d6ca2b69ee1b38bce9a9e6aa2c8e3cdf0380ab8ff6623e5047d49da3e9a2ec8"
+  },
+  {
+    "tool": "news_bigdata_news_list",
+    "domain": null,
+    "arguments": {
+      "matchKeyword": "贵州茅台酒股份有限公司",
+      "keywordType": "name",
+      "pageIndex": 1,
+      "pageSize": 8,
+      "sentimentLabel": 1
+    },
+    "invocation_id": "1793069167207259000",
+    "elapsed_seconds": 3.658,
+    "status": "data",
+    "error_category": null,
+    "result_type": "dict",
+    "top_level_fields": [
+      "resultList",
+      "total"
+    ],
+    "row_count": 8,
+    "reported_total": 776,
+    "numeric_evidence": [
+      {
+        "path": "resultList[0].sentimentLabel",
+        "value": 1
+      },
+      {
+        "path": "resultList[1].sentimentLabel",
+        "value": 1
+      },
+      {
+        "path": "resultList[2].sentimentLabel",
+        "value": 1
+      },
+      {
+        "path": "resultList[3].sentimentLabel",
+        "value": 1
+      },
+      {
+        "path": "resultList[4].sentimentLabel",
+        "value": 1
+      },
+      {
+        "path": "total",
+        "value": 776
+      }
+    ],
+    "response_sha256": "9aee367bec4bb0cb9c1b169b672ae0b2321e2d308342995d81e1aeced765e834"
+  }
+]

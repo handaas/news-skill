@@ -1,0 +1,54 @@
+{
+  "metric_overflows": [],
+  "document_title": "比亚迪股份有限公司 舆情大数据报告",
+  "title_matches": true,
+  "charts": 4,
+  "rendered_charts": 4,
+  "zero_size_charts": 0,
+  "chart_details": [
+    {
+      "width": 984,
+      "height": 300,
+      "instance": true,
+      "renderer": true,
+      "graphics": 25
+    },
+    {
+      "width": 984,
+      "height": 300,
+      "instance": true,
+      "renderer": true,
+      "graphics": 99
+    },
+    {
+      "width": 984,
+      "height": 300,
+      "instance": true,
+      "renderer": true,
+      "graphics": 35
+    },
+    {
+      "width": 984,
+      "height": 300,
+      "instance": true,
+      "renderer": true,
+      "graphics": 37
+    }
+  ],
+  "page_width": 1905,
+  "viewport_width": 1920,
+  "empty_headers": 0,
+  "script_errors": [],
+  "external_resources": 0,
+  "external_asset_references": 0,
+  "ok": true,
+  "report_html_sha256": "8ffd610a55c72ee2a9708b962f497c39b3093edeff9eec812374784e4e593a6e",
+  "report_json_sha256": "88d2a69a1fc96b5c3ab1849f6e00f3be8e73a09aa4f8eece8c95e7d5b660baf0",
+  "screenshot": "browser.png",
+  "skill": "news-skill",
+  "id": "01-reputation-overview",
+  "browser": "Ego Lite",
+  "space_id": 4,
+  "offline": true,
+  "checked_at": "2026-10-27T03:03:30.849Z"
+}

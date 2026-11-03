@@ -1,0 +1,129 @@
+[
+  {
+    "tool": "news_bigdata_news_stats",
+    "domain": null,
+    "arguments": {
+      "matchKeyword": "比亚迪股份有限公司",
+      "keywordType": "name"
+    },
+    "invocation_id": "1793069164034083000",
+    "elapsed_seconds": 0.571,
+    "status": "data",
+    "error_category": null,
+    "result_type": "dict",
+    "top_level_fields": [
+      "newsSentimentStats",
+      "newsSentimentTrend",
+      "sentimentLabelList"
+    ],
+    "row_count": null,
+    "reported_total": null,
+    "numeric_evidence": [
+      {
+        "path": "newsSentimentStats.negative",
+        "value": 156
+      },
+      {
+        "path": "newsSentimentStats.neutral",
+        "value": 3402
+      },
+      {
+        "path": "newsSentimentStats.positive",
+        "value": 1540
+      },
+      {
+        "path": "newsSentimentStats.unknown",
+        "value": 33
+      },
+      {
+        "path": "newsSentimentTrend[0].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[0].stats.positive",
+        "value": 5
+      },
+      {
+        "path": "newsSentimentTrend[1].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[1].stats.positive",
+        "value": 2
+      },
+      {
+        "path": "newsSentimentTrend[2].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[2].stats.positive",
+        "value": 2
+      },
+      {
+        "path": "newsSentimentTrend[3].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[3].stats.positive",
+        "value": 3
+      },
+      {
+        "path": "newsSentimentTrend[4].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[4].stats.positive",
+        "value": 1
+      }
+    ],
+    "response_sha256": "6311c0b97987fb97536bdcd5dadc807cc45782bb455fda4032b10087aca88648"
+  },
+  {
+    "tool": "news_bigdata_news_list",
+    "domain": null,
+    "arguments": {
+      "matchKeyword": "比亚迪股份有限公司",
+      "keywordType": "name",
+      "pageIndex": 1,
+      "pageSize": 10
+    },
+    "invocation_id": "1793069164034083000",
+    "elapsed_seconds": 0.554,
+    "status": "data",
+    "error_category": null,
+    "result_type": "dict",
+    "top_level_fields": [
+      "resultList",
+      "total"
+    ],
+    "row_count": 10,
+    "reported_total": 5131,
+    "numeric_evidence": [
+      {
+        "path": "resultList[0].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "resultList[1].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "resultList[2].sentimentLabel",
+        "value": 1
+      },
+      {
+        "path": "resultList[3].sentimentLabel",
+        "value": 1
+      },
+      {
+        "path": "resultList[4].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "total",
+        "value": 5131
+      }
+    ],
+    "response_sha256": "6b80f06180582442bc8e806c3e9c7c3d46aae203d7db2308fdb30fe17e0b7e6e"
+  }
+]

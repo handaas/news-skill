@@ -1,0 +1,130 @@
+[
+  {
+    "tool": "news_bigdata_news_stats",
+    "domain": null,
+    "arguments": {
+      "matchKeyword": "华为技术有限公司",
+      "keywordType": "name"
+    },
+    "invocation_id": "1793069165447636000",
+    "elapsed_seconds": 0.7,
+    "status": "data",
+    "error_category": null,
+    "result_type": "dict",
+    "top_level_fields": [
+      "newsSentimentStats",
+      "newsSentimentTrend",
+      "sentimentLabelList"
+    ],
+    "row_count": null,
+    "reported_total": null,
+    "numeric_evidence": [
+      {
+        "path": "newsSentimentStats.negative",
+        "value": 307
+      },
+      {
+        "path": "newsSentimentStats.neutral",
+        "value": 3670
+      },
+      {
+        "path": "newsSentimentStats.positive",
+        "value": 4617
+      },
+      {
+        "path": "newsSentimentStats.unknown",
+        "value": 18
+      },
+      {
+        "path": "newsSentimentTrend[0].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[0].stats.positive",
+        "value": 3
+      },
+      {
+        "path": "newsSentimentTrend[1].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[1].stats.positive",
+        "value": 1
+      },
+      {
+        "path": "newsSentimentTrend[2].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[2].stats.positive",
+        "value": 11
+      },
+      {
+        "path": "newsSentimentTrend[3].stats.negative",
+        "value": 4
+      },
+      {
+        "path": "newsSentimentTrend[3].stats.positive",
+        "value": 15
+      },
+      {
+        "path": "newsSentimentTrend[4].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[4].stats.positive",
+        "value": 2
+      }
+    ],
+    "response_sha256": "b2ea530c6a368a48bf35d7d3cfa329f2a86dccd7e79c0570fa2f61b8d0aecaa7"
+  },
+  {
+    "tool": "news_bigdata_news_list",
+    "domain": null,
+    "arguments": {
+      "matchKeyword": "华为技术有限公司",
+      "keywordType": "name",
+      "pageIndex": 1,
+      "pageSize": 10,
+      "sentimentLabel": 0
+    },
+    "invocation_id": "1793069165447636000",
+    "elapsed_seconds": 0.785,
+    "status": "data",
+    "error_category": null,
+    "result_type": "dict",
+    "top_level_fields": [
+      "resultList",
+      "total"
+    ],
+    "row_count": 10,
+    "reported_total": 307,
+    "numeric_evidence": [
+      {
+        "path": "resultList[0].sentimentLabel",
+        "value": 0
+      },
+      {
+        "path": "resultList[1].sentimentLabel",
+        "value": 0
+      },
+      {
+        "path": "resultList[2].sentimentLabel",
+        "value": 0
+      },
+      {
+        "path": "resultList[3].sentimentLabel",
+        "value": 0
+      },
+      {
+        "path": "resultList[4].sentimentLabel",
+        "value": 0
+      },
+      {
+        "path": "total",
+        "value": 307
+      }
+    ],
+    "response_sha256": "cd9b96f071dfa397b5b7cdc65c52fac93df84eef62fed25ccf4e64d17136ce03"
+  }
+]

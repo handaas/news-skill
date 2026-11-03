@@ -1,0 +1,53 @@
+{
+  "metric_overflows": [],
+  "document_title": "贵州茅台酒股份有限公司 舆情大数据报告",
+  "title_matches": true,
+  "charts": 4,
+  "rendered_charts": 4,
+  "zero_size_charts": 0,
+  "chart_details": [
+    {
+      "width": 984,
+      "height": 300,
+      "instance": true,
+      "renderer": true,
+      "graphics": 25
+    },
+    {
+      "width": 984,
+      "height": 300,
+      "instance": true,
+      "renderer": true,
+      "graphics": 97
+    },
+    {
+      "width": 984,
+      "height": 300,
+      "instance": true,
+      "renderer": true,
+      "graphics": 39
+    },
+    {
+      "width": 984,
+      "height": 300,
+      "instance": true,
+      "renderer": true,
+      "graphics": 37
+    }
+  ],
+  "page_width": 1905,
+  "viewport_width": 1920,
+  "empty_headers": 0,
+  "script_errors": [],
+  "external_resources": 0,
+  "external_asset_references": 0,
+  "ok": true,
+  "report_html_sha256": "ea8f0862e7ad1254935f80f190e24fab786e337955b35874bb30ef794b0a6b41",
+  "report_json_sha256": "1961ffb27873e8a8c655ab69d446f6d000fd71f2b2f78b38c7c0d9322341e48e",
+  "skill": "news-skill",
+  "id": "03-positive-coverage",
+  "browser": "Ego Lite",
+  "space_id": 4,
+  "offline": true,
+  "checked_at": "2026-10-27T03:03:33.667Z"
+}

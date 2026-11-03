@@ -1,0 +1,130 @@
+[
+  {
+    "tool": "news_bigdata_news_stats",
+    "domain": null,
+    "arguments": {
+      "matchKeyword": "宁德时代新能源科技股份有限公司",
+      "keywordType": "name"
+    },
+    "invocation_id": "1793069167207325000",
+    "elapsed_seconds": 1.175,
+    "status": "data",
+    "error_category": null,
+    "result_type": "dict",
+    "top_level_fields": [
+      "newsSentimentStats",
+      "newsSentimentTrend",
+      "sentimentLabelList"
+    ],
+    "row_count": null,
+    "reported_total": null,
+    "numeric_evidence": [
+      {
+        "path": "newsSentimentStats.negative",
+        "value": 184
+      },
+      {
+        "path": "newsSentimentStats.neutral",
+        "value": 3006
+      },
+      {
+        "path": "newsSentimentStats.positive",
+        "value": 2362
+      },
+      {
+        "path": "newsSentimentStats.unknown",
+        "value": 20
+      },
+      {
+        "path": "newsSentimentTrend[0].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[0].stats.positive",
+        "value": 6
+      },
+      {
+        "path": "newsSentimentTrend[1].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[1].stats.positive",
+        "value": 1
+      },
+      {
+        "path": "newsSentimentTrend[2].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[2].stats.positive",
+        "value": 4
+      },
+      {
+        "path": "newsSentimentTrend[3].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[3].stats.positive",
+        "value": 10
+      },
+      {
+        "path": "newsSentimentTrend[4].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[4].stats.positive",
+        "value": 3
+      }
+    ],
+    "response_sha256": "3075153ba56b141fdd6e04306195704fdd6df1c6c4cc726f72cb716c689e4bcb"
+  },
+  {
+    "tool": "news_bigdata_news_list",
+    "domain": null,
+    "arguments": {
+      "matchKeyword": "宁德时代新能源科技股份有限公司",
+      "keywordType": "name",
+      "pageIndex": 1,
+      "pageSize": 8,
+      "sentimentLabel": 2
+    },
+    "invocation_id": "1793069167207325000",
+    "elapsed_seconds": 3.464,
+    "status": "data",
+    "error_category": null,
+    "result_type": "dict",
+    "top_level_fields": [
+      "resultList",
+      "total"
+    ],
+    "row_count": 8,
+    "reported_total": 3006,
+    "numeric_evidence": [
+      {
+        "path": "resultList[0].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "resultList[1].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "resultList[2].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "resultList[3].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "resultList[4].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "total",
+        "value": 3006
+      }
+    ],
+    "response_sha256": "c764ec55217b6f8a5746383421b8af66f6f479b19981dea9a0abaf89a10b3e21"
+  }
+]

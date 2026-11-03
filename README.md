@@ -169,9 +169,9 @@ python scripts/render_report.py \
 
 | 文件 | 说明 | 链接 |
 | --- | --- | --- |
-| HTML 报告 | 浏览器直接打开，含离线图表 | [查看](examples/live-replaced-20261027/reports/01-reputation-overview/report.html) |
-| Markdown 报告 | 纯文本格式，适合 Git / 文档系统 | [查看](examples/live-replaced-20261027/reports/01-reputation-overview/report.md) |
-| JSON 原始数据 | 结构化数据，适合二次处理 | [查看](examples/live-replaced-20261027/reports/01-reputation-overview/report.json) |
+| HTML 报告 | 浏览器直接打开，含离线图表 | [查看](examples/01-reputation-overview/report.html) |
+| Markdown 报告 | 纯文本格式，适合 Git / 文档系统 | [查看](examples/01-reputation-overview/report.md) |
+| JSON 原始数据 | 结构化数据，适合二次处理 | [查看](examples/01-reputation-overview/report.json) |
 | 全部已验收案例 | 本 skill 当前全部完全通过示例 | [查看](examples/README.md) |
 
 完整的 8 场景测试、未完全通过案例和历史运行保存在 [test-records](test-records/README.md)，不作为公开示例。

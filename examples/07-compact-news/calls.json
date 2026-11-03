@@ -1,0 +1,129 @@
+[
+  {
+    "tool": "news_bigdata_news_stats",
+    "domain": null,
+    "arguments": {
+      "matchKeyword": "北京京东世纪贸易有限公司",
+      "keywordType": "name"
+    },
+    "invocation_id": "1793069169227097000",
+    "elapsed_seconds": 3.4,
+    "status": "data",
+    "error_category": null,
+    "result_type": "dict",
+    "top_level_fields": [
+      "newsSentimentStats",
+      "newsSentimentTrend",
+      "sentimentLabelList"
+    ],
+    "row_count": null,
+    "reported_total": null,
+    "numeric_evidence": [
+      {
+        "path": "newsSentimentStats.negative",
+        "value": 371
+      },
+      {
+        "path": "newsSentimentStats.neutral",
+        "value": 2695
+      },
+      {
+        "path": "newsSentimentStats.positive",
+        "value": 1298
+      },
+      {
+        "path": "newsSentimentStats.unknown",
+        "value": 21
+      },
+      {
+        "path": "newsSentimentTrend[0].stats.negative",
+        "value": 1
+      },
+      {
+        "path": "newsSentimentTrend[0].stats.positive",
+        "value": 3
+      },
+      {
+        "path": "newsSentimentTrend[1].stats.negative",
+        "value": 1
+      },
+      {
+        "path": "newsSentimentTrend[1].stats.positive",
+        "value": 3
+      },
+      {
+        "path": "newsSentimentTrend[2].stats.negative",
+        "value": 1
+      },
+      {
+        "path": "newsSentimentTrend[2].stats.positive",
+        "value": 5
+      },
+      {
+        "path": "newsSentimentTrend[3].stats.negative",
+        "value": 2
+      },
+      {
+        "path": "newsSentimentTrend[3].stats.positive",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[4].stats.negative",
+        "value": 0
+      },
+      {
+        "path": "newsSentimentTrend[4].stats.positive",
+        "value": 4
+      }
+    ],
+    "response_sha256": "589b22b20e901f4411cbc5a00d2902e2845eb63aa5a3fcd6fd62aa0dbe53481d"
+  },
+  {
+    "tool": "news_bigdata_news_list",
+    "domain": null,
+    "arguments": {
+      "matchKeyword": "北京京东世纪贸易有限公司",
+      "keywordType": "name",
+      "pageIndex": 1,
+      "pageSize": 5
+    },
+    "invocation_id": "1793069169227097000",
+    "elapsed_seconds": 2.404,
+    "status": "data",
+    "error_category": null,
+    "result_type": "dict",
+    "top_level_fields": [
+      "resultList",
+      "total"
+    ],
+    "row_count": 5,
+    "reported_total": 4385,
+    "numeric_evidence": [
+      {
+        "path": "resultList[0].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "resultList[1].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "resultList[2].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "resultList[3].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "resultList[4].sentimentLabel",
+        "value": 2
+      },
+      {
+        "path": "total",
+        "value": 4385
+      }
+    ],
+    "response_sha256": "5a3d6d0aaac4ca494965a109efa0e23ff26e46948eb045d4563dce673e95d723"
+  }
+]

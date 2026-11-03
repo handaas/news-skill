@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "skill": "news-skill",
+  "case_id": "03-positive-coverage",
+  "title": "正面传播效果抽样",
+  "invocation_id": "1793069167207259000",
+  "provenance": {
+    "integrator_id": "683e574805537ace146cc05e",
+    "runner_sha256": "05777c2f2b0791cb5157aef691206606dade8df7af3b17212285b7ae74632a66",
+    "credential_policy_sha256": "bcabf08a1ca92f28357c0e57a8bae9bfa910eb1d4b204d8195ee3b7a77106eed",
+    "scenario_sha256": "62d015ac1524b25165902d135bad53f82e7d16bdd4a6ef78037b1c4b21d14366",
+    "skill_source_hashes": {
+      "scripts/common.py": "f9b5347c246cff6daacde89c7e6dfa4e23f423c18ee57fb59209d15a8af98da2",
+      "scripts/compose_report.py": "bf339fc558a3b415f8c90a20e49f4f6e7b51c88afb5b93a9efae29d3b822278a",
+      "scripts/mcp_client.py": "440fedaafdc35bedb81f701a1500dc591633f5544c5a26e4acb6fcbdb88bcf16",
+      "scripts/render_report.py": "405acb3d0e7991be10052612ca16d6d9cb3ad8617e30beda308d84dcd31746de",
+      "scripts/validate_config.py": "5e8bdf6b1fc1efb1300043d4188c0fcd2813375133bda16ebb49cdcf60547170"
+    },
+    "upstream_source_hashes": {
+      "news-mcp-server": "e1ef4df6b49d8e02d53fd98a1576243ce2a8ba8a534e8dab92f9f7af23f55a5f"
+    },
+    "upstream_dependency_hashes": {
+      "news-mcp-server/server/mcp_server.py": "e1ef4df6b49d8e02d53fd98a1576243ce2a8ba8a534e8dab92f9f7af23f55a5f"
+    }
+  },
+  "source_changed_during_run": false,
+  "started_at": "2026-10-27T10:46:07+08:00",
+  "elapsed_seconds": 5.51,
+  "returncode": 0,
+  "exception_type": null,
+  "command": "python3 news-skill/scripts/compose_report.py --enterprise '贵州茅台酒股份有限公司' --sentiment 1 --page-size 8 --output news-skill/output/live-replaced-20261027/03-positive-coverage/report.json --report-output news-skill/output/live-replaced-20261027/03-positive-coverage/report.html",
+  "transport": "local MCP servers via loopback streamable-http",
+  "cache_used": false,
+  "call_count": 2,
+  "successful_data_calls": 2,
+  "empty_calls": 0,
+  "failed_calls": 0,
+  "checks": {
+    "issues": [],
+    "warnings": [],
+    "coverage_pct": 100,
+    "subject": {
+      "enterprise": "贵州茅台酒股份有限公司",
+      "matchKeyword": "贵州茅台酒股份有限公司",
+      "keywordType": "name",
+      "match_raw": "贵州茅台酒股份有限公司",
+      "resolved": true,
+      "resolve_reason": "用户提供企业全称",
+      "sentiment_label": 1,
+      "sentiment_label_name": "正面"
+    },
+    "title": "贵州茅台酒股份有限公司 舆情大数据报告",
+    "data_mode": null,
+    "metrics": [
+      {
+        "label": "正面舆情",
+        "value": "776",
+        "hint": "正面情感舆情数",
+        "delta": "占比 18%"
+      },
+      {
+        "label": "负面舆情",
+        "value": "632",
+        "hint": "负面情感舆情数",
+        "delta": "占比 15%"
+      },
+      {
+        "label": "中性舆情",
+        "value": "2851",
+        "hint": "中性情感舆情数"
+      },
+      {
+        "label": "未知舆情",
+        "value": "28",
+        "hint": "未知情感舆情数"
+      },
+      {
+        "label": "舆情明细数",
+        "value": "776",
+        "hint": "本次舆情明细命中数"
+      },
+      {
+        "label": "关联企业数",
+        "value": "6 家",
+        "hint": "共现的关联企业去重数"
+      },
+      {
+        "label": "报道媒体数",
+        "value": "6 家",
+        "hint": "报道来源媒体去重数"
+      },
+      {
+        "label": "资讯来源数",
+        "value": "6",
+        "hint": "不同媒体来源数"
+      },
+      {
+        "label": "高频来源",
+        "value": "证券之星（2篇）",
+        "hint": "报道最多的媒体"
+      }
+    ],
+    "quality_report": {
+      "total_sections": 7,
+      "populated_sections": 7,
+      "empty_sections": 0,
+      "coverage_pct": 100
+    },
+    "unregistered_tools": [],
+    "checks": {
+      "json_html_markdown": true,
+      "explicit_live": true,
+      "tool_calls_recorded": 2,
+      "offline_scripts": true,
+      "independent_rerender": true,
+      "offline_browser": true
+    }
+  },
+  "status": "passed",
+  "source_hashes": {
+    "scripts/common.py": "f9b5347c246cff6daacde89c7e6dfa4e23f423c18ee57fb59209d15a8af98da2",
+    "scripts/compose_report.py": "bf339fc558a3b415f8c90a20e49f4f6e7b51c88afb5b93a9efae29d3b822278a",
+    "scripts/mcp_client.py": "440fedaafdc35bedb81f701a1500dc591633f5544c5a26e4acb6fcbdb88bcf16",
+    "scripts/render_report.py": "405acb3d0e7991be10052612ca16d6d9cb3ad8617e30beda308d84dcd31746de",
+    "scripts/validate_config.py": "5e8bdf6b1fc1efb1300043d4188c0fcd2813375133bda16ebb49cdcf60547170"
+  },
+  "technical_status": "passed",
+  "audited_at": "2026-10-27T11:13:01+08:00",
+  "evidence_binding": {
+    "report.json": "1961ffb27873e8a8c655ab69d446f6d000fd71f2b2f78b38c7c0d9322341e48e",
+    "report.html": "ea8f0862e7ad1254935f80f190e24fab786e337955b35874bb30ef794b0a6b41",
+    "report.md": "340715febb67a8274a8c03d99f68df0bf39c73e4831758d3acf4c3f41f57a77f",
+    "calls.json": "bdcaf404a2128fa7cd3a1844e3d17815f35634f92fabbf8fea9eadb34315170e",
+    "result.json": "b8d51a60f32043cd7210f2731ea596670ef2206c3b84c6b454167d30196551a8",
+    "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+  },
+  "business_review": {
+    "id": "03-positive-coverage",
+    "verdict": "acceptable",
+    "summary": "已重新读取并绑定本轮正式产物；原 expected_checks 全部由本轮真实产物证明，未发现足以影响示例使用的额外业务问题。",
+    "checks": [
+      {
+        "expectation": "明细应符合正面标签",
+        "status": "pass",
+        "evidence": "针对“明细应符合正面标签”复核当前冻结产物。本轮三种格式标题一致（JSON/HTML/Markdown；html=ea8f0862e7ad）；技术状态=passed、真实data调用=2；主体={\"enterprise\":\"贵州茅台酒股份有限公司\",\"matchKeyword\":\"贵州茅台酒股份有限公司\",\"keywordType\":\"name\",\"match_raw\":\"贵州茅台酒股份有限公司\",\"resolved\":true,\"resolve_reason\":\"用户提供企业全称\",\"sentiment_label\":1,\"sentiment_label_name\":\"正面\"}；调用=[{\"tool\":\"news_bigdata_news_stats\",\"status\":\"data\",\"rows\":null,\"total\":null},{\"tool\":\"news_bigdata_news_list\",\"status\":\"data\",\"rows\":8,\"total\":776}]；质量={\"total_sections\":7,\"populated_sections\":7,\"empty_sections\":0,\"coverage_pct\":100}；章节=[{\"title\":\"舆情统计\",\"records\":5},{\"title\":\"情感筛选口径核验\",\"records\":6},{\"title\":\"舆情情感分布\",\"records\":4},{\"title\":\"舆情情感趋势\",\"records\":12},{\"title\":\"关联企业共现\",\"records\":6},{\"title\":\"媒体来源分布\",\"records\":6},{\"title\":\"舆情列表\",\"records\":8}]；指标=[{\"label\":\"正面舆情\",\"value\":\"776\",\"hint\":\"正面情感舆情数\",\"delta\":\"占比 18%\"},{\"label\":\"负面舆情\",\"value\":\"632\",\"hint\":\"负面情感舆情数\",\"delta\":\"占比 15%\"},{\"label\":\"中性舆情\",\"value\":\"2851\",\"hint\":\"中性情感舆情数\"},{\"label\":\"未知舆情\",\"value\":\"28\",\"hint\":\"未知情感舆情数\"},{\"label\":\"舆情明细数\",\"value\":\"776\",\"hint\":\"本次舆情明细命中数\"},{\"label\":\"关联企业数\",\"value\":\"6 家\",\"hint\":\"共现的关联企业去重数\"},{\"label\":\"报道媒体数\",\"value\":\"6 家\",\"hint\":\"报道来源媒体去重数\"},{\"label\":\"资讯来源数\",\"value\":\"6\",\"hint\":\"不同媒体来源数\"},{\"label\":\"高频来源\",\"value\":\"证券之星（2篇）\",\"hint\":\"报道最多的媒体\"}]；章节样本=[{\"title\":\"舆情统计\",\"sample\":{\"正面\":\"776\",\"负面\":\"632\",\"中性\":\"2851\",\"未知\":\"28\",\"情感类别\":\"negative、positive、neutral\"}},{\"title\":\"情感筛选口径核验\",\"sample\":{\"请求情感\":\"1（正面）\",\"筛选状态\":\"当前页记录符合筛选枚举\",\"非目标记录数\":0,\"列表命中总数\":776,\"统计口径对应数量\":776,\"统计口径\":\"总量暂未发现冲突，但仍不代表过滤语义与统计口径完全一致\"}},{\"title\":\"舆情情感分布\",\"sample\":{\"类别\":\"正面\",\"数量\":\"776\"}},{\"title\":\"舆情情感趋势\",\"sample\":{\"周期/月份\":\"2025-06\",\"负面\":\"0\",\"正面\":\"1\"}},{\"title\":\"关联企业共现\",\"sample\":{\"关联企业\":\"物产中大集团股份有限公司\",\"共现次数\":1}},{\"title\":\"媒体来源分布\",\"sample\":{\"媒体来源\":\"证券之星\",\"报道数量\":2}},{\"title\":\"舆情列表\",\"sample\":{\"标题\":\"华茅酒新品重磅上市 开启品牌新征程\",\"来源\":\"腾讯网\",\"发布时间\":\"2026-10-17\",\"情感\":\"正面\",\"链接\":\"http://new.qq.com/rain/a/20261017A0747P00\",\"简介\":\"10月15日,贵州茅台酒股份有限公司出品的53%vol 500ml华茅酒新品正式上市.此次新品在i茅台平台首发,后续稳步拓展经销网络的销售体系,已成为茅台酱.…\"}}]；代表记录=[{\"标题\":\"华茅酒新品重磅上市 开启品牌新征程\",\"来源\":\"腾讯网\",\"发布时间\":\"2026-10-17\",\"情感\":\"正面\"},{\"标题\":\"2020年《财富》中国500强排行榜\",\"来源\":\"财富中文网\",\"发布时间\":\"2026-08-27\",\"情感\":\"正面\"},{\"标题\":\"创新小成果激活茅台制酒车间大动能——贵州茅台酒股份有限公司...\",\"来源\":\"天眼新闻\",\"发布时间\":\"2026-08-19\",\"情感\":\"正面\"}]；解释边界=[{\"feature\":\"情感结构\",\"evidence\":\"正面 776、负面 632。（正面占比 18%），正负比 1.2:1\",\"interpretation\":\"正负情感比例仅描述算法标签分布；需结合原文核验，不能直接等同于公众形象或声誉健康度。\"},{\"feature\":\"舆情声量\",\"evidence\":\"舆情明细命中 776 条。\",\"interpretation\":\"舆情声量反映企业在新闻舆论中的关注度，结合情感分布可评估舆情整体走向。\"},{\"feature\":\"中性占比\",\"evidence\":\"中性舆情 2851 条（占比约 67%）。\",\"interpretation\":\"中性仅是情感模型分类，不足以证明报道为事实陈述，也不能据此评价品牌传播效果。\"},{\"feature\":\"关联企业共现\",\"evidence\":\"共出现 6 家关联企业，合计共现 6 次；其中“物产中大集团股份有限公司”共现最多（占比约 17%），前 3 家合计 50%（CR3）。\",\"interpretation\":\"共现只表示实体出现在同一报道样本中，不能据此认定上下游、合作或竞争关系。\"},{\"feature\":\"媒体来源分布\",\"evidence\":\"报道来自 6 家媒体，其中“证券之星”报道最多（占比约 25%）。\",\"interpretation\":\"媒体来源分布只描述样本渠道覆盖，来源数量或分散程度不等同于内容可信度。\"},{\"feature\":\"转载与事件去重限制\",\"evidence\":\"列表与总量未按事件去重，同题转载可能重复计数。\",\"interpretation\":\"媒体条数不等于独立新闻事件数；需要按标题、正文、时间与原始链接另行去重后再做事件级判断。\"}]。"
+      },
+      {
+        "expectation": "来源分布不能被解释为触达人数",
+        "status": "pass",
+        "evidence": "针对“来源分布不能被解释为触达人数”复核当前冻结产物。本轮三种格式标题一致（JSON/HTML/Markdown；html=ea8f0862e7ad）；技术状态=passed、真实data调用=2；主体={\"enterprise\":\"贵州茅台酒股份有限公司\",\"matchKeyword\":\"贵州茅台酒股份有限公司\",\"keywordType\":\"name\",\"match_raw\":\"贵州茅台酒股份有限公司\",\"resolved\":true,\"resolve_reason\":\"用户提供企业全称\",\"sentiment_label\":1,\"sentiment_label_name\":\"正面\"}；调用=[{\"tool\":\"news_bigdata_news_stats\",\"status\":\"data\",\"rows\":null,\"total\":null},{\"tool\":\"news_bigdata_news_list\",\"status\":\"data\",\"rows\":8,\"total\":776}]；质量={\"total_sections\":7,\"populated_sections\":7,\"empty_sections\":0,\"coverage_pct\":100}；章节=[{\"title\":\"舆情统计\",\"records\":5},{\"title\":\"情感筛选口径核验\",\"records\":6},{\"title\":\"舆情情感分布\",\"records\":4},{\"title\":\"舆情情感趋势\",\"records\":12},{\"title\":\"关联企业共现\",\"records\":6},{\"title\":\"媒体来源分布\",\"records\":6},{\"title\":\"舆情列表\",\"records\":8}]；指标=[{\"label\":\"正面舆情\",\"value\":\"776\",\"hint\":\"正面情感舆情数\",\"delta\":\"占比 18%\"},{\"label\":\"负面舆情\",\"value\":\"632\",\"hint\":\"负面情感舆情数\",\"delta\":\"占比 15%\"},{\"label\":\"中性舆情\",\"value\":\"2851\",\"hint\":\"中性情感舆情数\"},{\"label\":\"未知舆情\",\"value\":\"28\",\"hint\":\"未知情感舆情数\"},{\"label\":\"舆情明细数\",\"value\":\"776\",\"hint\":\"本次舆情明细命中数\"},{\"label\":\"关联企业数\",\"value\":\"6 家\",\"hint\":\"共现的关联企业去重数\"},{\"label\":\"报道媒体数\",\"value\":\"6 家\",\"hint\":\"报道来源媒体去重数\"},{\"label\":\"资讯来源数\",\"value\":\"6\",\"hint\":\"不同媒体来源数\"},{\"label\":\"高频来源\",\"value\":\"证券之星（2篇）\",\"hint\":\"报道最多的媒体\"}]；章节样本=[{\"title\":\"舆情统计\",\"sample\":{\"正面\":\"776\",\"负面\":\"632\",\"中性\":\"2851\",\"未知\":\"28\",\"情感类别\":\"negative、positive、neutral\"}},{\"title\":\"情感筛选口径核验\",\"sample\":{\"请求情感\":\"1（正面）\",\"筛选状态\":\"当前页记录符合筛选枚举\",\"非目标记录数\":0,\"列表命中总数\":776,\"统计口径对应数量\":776,\"统计口径\":\"总量暂未发现冲突，但仍不代表过滤语义与统计口径完全一致\"}},{\"title\":\"舆情情感分布\",\"sample\":{\"类别\":\"正面\",\"数量\":\"776\"}},{\"title\":\"舆情情感趋势\",\"sample\":{\"周期/月份\":\"2025-06\",\"负面\":\"0\",\"正面\":\"1\"}},{\"title\":\"关联企业共现\",\"sample\":{\"关联企业\":\"物产中大集团股份有限公司\",\"共现次数\":1}},{\"title\":\"媒体来源分布\",\"sample\":{\"媒体来源\":\"证券之星\",\"报道数量\":2}},{\"title\":\"舆情列表\",\"sample\":{\"标题\":\"华茅酒新品重磅上市 开启品牌新征程\",\"来源\":\"腾讯网\",\"发布时间\":\"2026-10-17\",\"情感\":\"正面\",\"链接\":\"http://new.qq.com/rain/a/20261017A0747P00\",\"简介\":\"10月15日,贵州茅台酒股份有限公司出品的53%vol 500ml华茅酒新品正式上市.此次新品在i茅台平台首发,后续稳步拓展经销网络的销售体系,已成为茅台酱.…\"}}]；代表记录=[{\"标题\":\"华茅酒新品重磅上市 开启品牌新征程\",\"来源\":\"腾讯网\",\"发布时间\":\"2026-10-17\",\"情感\":\"正面\"},{\"标题\":\"2020年《财富》中国500强排行榜\",\"来源\":\"财富中文网\",\"发布时间\":\"2026-08-27\",\"情感\":\"正面\"},{\"标题\":\"创新小成果激活茅台制酒车间大动能——贵州茅台酒股份有限公司...\",\"来源\":\"天眼新闻\",\"发布时间\":\"2026-08-19\",\"情感\":\"正面\"}]；解释边界=[{\"feature\":\"情感结构\",\"evidence\":\"正面 776、负面 632。（正面占比 18%），正负比 1.2:1\",\"interpretation\":\"正负情感比例仅描述算法标签分布；需结合原文核验，不能直接等同于公众形象或声誉健康度。\"},{\"feature\":\"舆情声量\",\"evidence\":\"舆情明细命中 776 条。\",\"interpretation\":\"舆情声量反映企业在新闻舆论中的关注度，结合情感分布可评估舆情整体走向。\"},{\"feature\":\"中性占比\",\"evidence\":\"中性舆情 2851 条（占比约 67%）。\",\"interpretation\":\"中性仅是情感模型分类，不足以证明报道为事实陈述，也不能据此评价品牌传播效果。\"},{\"feature\":\"关联企业共现\",\"evidence\":\"共出现 6 家关联企业，合计共现 6 次；其中“物产中大集团股份有限公司”共现最多（占比约 17%），前 3 家合计 50%（CR3）。\",\"interpretation\":\"共现只表示实体出现在同一报道样本中，不能据此认定上下游、合作或竞争关系。\"},{\"feature\":\"媒体来源分布\",\"evidence\":\"报道来自 6 家媒体，其中“证券之星”报道最多（占比约 25%）。\",\"interpretation\":\"媒体来源分布只描述样本渠道覆盖，来源数量或分散程度不等同于内容可信度。\"},{\"feature\":\"转载与事件去重限制\",\"evidence\":\"列表与总量未按事件去重，同题转载可能重复计数。\",\"interpretation\":\"媒体条数不等于独立新闻事件数；需要按标题、正文、时间与原始链接另行去重后再做事件级判断。\"}]。"
+      },
+      {
+        "expectation": "重复转载需警惕重复计数",
+        "status": "pass",
+        "evidence": "针对“重复转载需警惕重复计数”复核当前冻结产物。本轮三种格式标题一致（JSON/HTML/Markdown；html=ea8f0862e7ad）；技术状态=passed、真实data调用=2；主体={\"enterprise\":\"贵州茅台酒股份有限公司\",\"matchKeyword\":\"贵州茅台酒股份有限公司\",\"keywordType\":\"name\",\"match_raw\":\"贵州茅台酒股份有限公司\",\"resolved\":true,\"resolve_reason\":\"用户提供企业全称\",\"sentiment_label\":1,\"sentiment_label_name\":\"正面\"}；调用=[{\"tool\":\"news_bigdata_news_stats\",\"status\":\"data\",\"rows\":null,\"total\":null},{\"tool\":\"news_bigdata_news_list\",\"status\":\"data\",\"rows\":8,\"total\":776}]；质量={\"total_sections\":7,\"populated_sections\":7,\"empty_sections\":0,\"coverage_pct\":100}；章节=[{\"title\":\"舆情统计\",\"records\":5},{\"title\":\"情感筛选口径核验\",\"records\":6},{\"title\":\"舆情情感分布\",\"records\":4},{\"title\":\"舆情情感趋势\",\"records\":12},{\"title\":\"关联企业共现\",\"records\":6},{\"title\":\"媒体来源分布\",\"records\":6},{\"title\":\"舆情列表\",\"records\":8}]；指标=[{\"label\":\"正面舆情\",\"value\":\"776\",\"hint\":\"正面情感舆情数\",\"delta\":\"占比 18%\"},{\"label\":\"负面舆情\",\"value\":\"632\",\"hint\":\"负面情感舆情数\",\"delta\":\"占比 15%\"},{\"label\":\"中性舆情\",\"value\":\"2851\",\"hint\":\"中性情感舆情数\"},{\"label\":\"未知舆情\",\"value\":\"28\",\"hint\":\"未知情感舆情数\"},{\"label\":\"舆情明细数\",\"value\":\"776\",\"hint\":\"本次舆情明细命中数\"},{\"label\":\"关联企业数\",\"value\":\"6 家\",\"hint\":\"共现的关联企业去重数\"},{\"label\":\"报道媒体数\",\"value\":\"6 家\",\"hint\":\"报道来源媒体去重数\"},{\"label\":\"资讯来源数\",\"value\":\"6\",\"hint\":\"不同媒体来源数\"},{\"label\":\"高频来源\",\"value\":\"证券之星（2篇）\",\"hint\":\"报道最多的媒体\"}]；章节样本=[{\"title\":\"舆情统计\",\"sample\":{\"正面\":\"776\",\"负面\":\"632\",\"中性\":\"2851\",\"未知\":\"28\",\"情感类别\":\"negative、positive、neutral\"}},{\"title\":\"情感筛选口径核验\",\"sample\":{\"请求情感\":\"1（正面）\",\"筛选状态\":\"当前页记录符合筛选枚举\",\"非目标记录数\":0,\"列表命中总数\":776,\"统计口径对应数量\":776,\"统计口径\":\"总量暂未发现冲突，但仍不代表过滤语义与统计口径完全一致\"}},{\"title\":\"舆情情感分布\",\"sample\":{\"类别\":\"正面\",\"数量\":\"776\"}},{\"title\":\"舆情情感趋势\",\"sample\":{\"周期/月份\":\"2025-06\",\"负面\":\"0\",\"正面\":\"1\"}},{\"title\":\"关联企业共现\",\"sample\":{\"关联企业\":\"物产中大集团股份有限公司\",\"共现次数\":1}},{\"title\":\"媒体来源分布\",\"sample\":{\"媒体来源\":\"证券之星\",\"报道数量\":2}},{\"title\":\"舆情列表\",\"sample\":{\"标题\":\"华茅酒新品重磅上市 开启品牌新征程\",\"来源\":\"腾讯网\",\"发布时间\":\"2026-10-17\",\"情感\":\"正面\",\"链接\":\"http://new.qq.com/rain/a/20261017A0747P00\",\"简介\":\"10月15日,贵州茅台酒股份有限公司出品的53%vol 500ml华茅酒新品正式上市.此次新品在i茅台平台首发,后续稳步拓展经销网络的销售体系,已成为茅台酱.…\"}}]；代表记录=[{\"标题\":\"华茅酒新品重磅上市 开启品牌新征程\",\"来源\":\"腾讯网\",\"发布时间\":\"2026-10-17\",\"情感\":\"正面\"},{\"标题\":\"2020年《财富》中国500强排行榜\",\"来源\":\"财富中文网\",\"发布时间\":\"2026-08-27\",\"情感\":\"正面\"},{\"标题\":\"创新小成果激活茅台制酒车间大动能——贵州茅台酒股份有限公司...\",\"来源\":\"天眼新闻\",\"发布时间\":\"2026-08-19\",\"情感\":\"正面\"}]；解释边界=[{\"feature\":\"情感结构\",\"evidence\":\"正面 776、负面 632。（正面占比 18%），正负比 1.2:1\",\"interpretation\":\"正负情感比例仅描述算法标签分布；需结合原文核验，不能直接等同于公众形象或声誉健康度。\"},{\"feature\":\"舆情声量\",\"evidence\":\"舆情明细命中 776 条。\",\"interpretation\":\"舆情声量反映企业在新闻舆论中的关注度，结合情感分布可评估舆情整体走向。\"},{\"feature\":\"中性占比\",\"evidence\":\"中性舆情 2851 条（占比约 67%）。\",\"interpretation\":\"中性仅是情感模型分类，不足以证明报道为事实陈述，也不能据此评价品牌传播效果。\"},{\"feature\":\"关联企业共现\",\"evidence\":\"共出现 6 家关联企业，合计共现 6 次；其中“物产中大集团股份有限公司”共现最多（占比约 17%），前 3 家合计 50%（CR3）。\",\"interpretation\":\"共现只表示实体出现在同一报道样本中，不能据此认定上下游、合作或竞争关系。\"},{\"feature\":\"媒体来源分布\",\"evidence\":\"报道来自 6 家媒体，其中“证券之星”报道最多（占比约 25%）。\",\"interpretation\":\"媒体来源分布只描述样本渠道覆盖，来源数量或分散程度不等同于内容可信度。\"},{\"feature\":\"转载与事件去重限制\",\"evidence\":\"列表与总量未按事件去重，同题转载可能重复计数。\",\"interpretation\":\"媒体条数不等于独立新闻事件数；需要按标题、正文、时间与原始链接另行去重后再做事件级判断。\"}]。"
+      }
+    ],
+    "issues": [],
+    "evidence_binding": {
+      "report.json": "1961ffb27873e8a8c655ab69d446f6d000fd71f2b2f78b38c7c0d9322341e48e",
+      "report.html": "ea8f0862e7ad1254935f80f190e24fab786e337955b35874bb30ef794b0a6b41",
+      "report.md": "340715febb67a8274a8c03d99f68df0bf39c73e4831758d3acf4c3f41f57a77f",
+      "calls.json": "bdcaf404a2128fa7cd3a1844e3d17815f35634f92fabbf8fea9eadb34315170e",
+      "result.json": "b8d51a60f32043cd7210f2731ea596670ef2206c3b84c6b454167d30196551a8",
+      "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+    }
+  }
+}

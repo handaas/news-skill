@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "skill": "news-skill",
+  "case_id": "01-reputation-overview",
+  "title": "品牌声誉总览",
+  "invocation_id": "1793069164034083000",
+  "provenance": {
+    "integrator_id": "683e574805537ace146cc05e",
+    "runner_sha256": "05777c2f2b0791cb5157aef691206606dade8df7af3b17212285b7ae74632a66",
+    "credential_policy_sha256": "bcabf08a1ca92f28357c0e57a8bae9bfa910eb1d4b204d8195ee3b7a77106eed",
+    "scenario_sha256": "89813b4a6a74f82075d3021e478a328a96730a6288aa9c047df8da687604544f",
+    "skill_source_hashes": {
+      "scripts/common.py": "f9b5347c246cff6daacde89c7e6dfa4e23f423c18ee57fb59209d15a8af98da2",
+      "scripts/compose_report.py": "bf339fc558a3b415f8c90a20e49f4f6e7b51c88afb5b93a9efae29d3b822278a",
+      "scripts/mcp_client.py": "440fedaafdc35bedb81f701a1500dc591633f5544c5a26e4acb6fcbdb88bcf16",
+      "scripts/render_report.py": "405acb3d0e7991be10052612ca16d6d9cb3ad8617e30beda308d84dcd31746de",
+      "scripts/validate_config.py": "5e8bdf6b1fc1efb1300043d4188c0fcd2813375133bda16ebb49cdcf60547170"
+    },
+    "upstream_source_hashes": {
+      "news-mcp-server": "e1ef4df6b49d8e02d53fd98a1576243ce2a8ba8a534e8dab92f9f7af23f55a5f"
+    },
+    "upstream_dependency_hashes": {
+      "news-mcp-server/server/mcp_server.py": "e1ef4df6b49d8e02d53fd98a1576243ce2a8ba8a534e8dab92f9f7af23f55a5f"
+    }
+  },
+  "source_changed_during_run": false,
+  "started_at": "2026-10-27T10:46:04+08:00",
+  "elapsed_seconds": 1.238,
+  "returncode": 0,
+  "exception_type": null,
+  "command": "python3 news-skill/scripts/compose_report.py --enterprise '比亚迪股份有限公司' --page-size 10 --output news-skill/output/live-replaced-20261027/01-reputation-overview/report.json --report-output news-skill/output/live-replaced-20261027/01-reputation-overview/report.html",
+  "transport": "local MCP servers via loopback streamable-http",
+  "cache_used": false,
+  "call_count": 2,
+  "successful_data_calls": 2,
+  "empty_calls": 0,
+  "failed_calls": 0,
+  "checks": {
+    "issues": [],
+    "warnings": [],
+    "coverage_pct": 86,
+    "subject": {
+      "enterprise": "比亚迪股份有限公司",
+      "matchKeyword": "比亚迪股份有限公司",
+      "keywordType": "name",
+      "match_raw": "比亚迪股份有限公司",
+      "resolved": true,
+      "resolve_reason": "用户提供企业全称",
+      "sentiment_label": null,
+      "sentiment_label_name": ""
+    },
+    "title": "比亚迪股份有限公司 舆情大数据报告",
+    "data_mode": null,
+    "metrics": [
+      {
+        "label": "正面舆情",
+        "value": "1540",
+        "hint": "正面情感舆情数",
+        "delta": "占比 30%"
+      },
+      {
+        "label": "负面舆情",
+        "value": "156",
+        "hint": "负面情感舆情数",
+        "delta": "占比 3%"
+      },
+      {
+        "label": "中性舆情",
+        "value": "3402",
+        "hint": "中性情感舆情数"
+      },
+      {
+        "label": "未知舆情",
+        "value": "33",
+        "hint": "未知情感舆情数"
+      },
+      {
+        "label": "舆情明细数",
+        "value": "5131",
+        "hint": "本次舆情明细命中数"
+      },
+      {
+        "label": "关联企业数",
+        "value": "5 家",
+        "hint": "共现的关联企业去重数"
+      },
+      {
+        "label": "报道媒体数",
+        "value": "6 家",
+        "hint": "报道来源媒体去重数"
+      },
+      {
+        "label": "资讯来源数",
+        "value": "6",
+        "hint": "不同媒体来源数"
+      },
+      {
+        "label": "高频来源",
+        "value": "新浪财经（4篇）",
+        "hint": "报道最多的媒体"
+      }
+    ],
+    "quality_report": {
+      "total_sections": 7,
+      "populated_sections": 6,
+      "empty_sections": 1,
+      "coverage_pct": 86
+    },
+    "unregistered_tools": [],
+    "checks": {
+      "json_html_markdown": true,
+      "explicit_live": true,
+      "tool_calls_recorded": 2,
+      "offline_scripts": true,
+      "independent_rerender": true,
+      "offline_browser": true
+    }
+  },
+  "status": "passed",
+  "source_hashes": {
+    "scripts/common.py": "f9b5347c246cff6daacde89c7e6dfa4e23f423c18ee57fb59209d15a8af98da2",
+    "scripts/compose_report.py": "bf339fc558a3b415f8c90a20e49f4f6e7b51c88afb5b93a9efae29d3b822278a",
+    "scripts/mcp_client.py": "440fedaafdc35bedb81f701a1500dc591633f5544c5a26e4acb6fcbdb88bcf16",
+    "scripts/render_report.py": "405acb3d0e7991be10052612ca16d6d9cb3ad8617e30beda308d84dcd31746de",
+    "scripts/validate_config.py": "5e8bdf6b1fc1efb1300043d4188c0fcd2813375133bda16ebb49cdcf60547170"
+  },
+  "technical_status": "passed",
+  "audited_at": "2026-10-27T11:13:01+08:00",
+  "evidence_binding": {
+    "report.json": "88d2a69a1fc96b5c3ab1849f6e00f3be8e73a09aa4f8eece8c95e7d5b660baf0",
+    "report.html": "8ffd610a55c72ee2a9708b962f497c39b3093edeff9eec812374784e4e593a6e",
+    "report.md": "02511496be478f4b3d94a53fed98d25d4660db04641dc1e8acc249944f628a48",
+    "calls.json": "8ebc81ebcbe3c6f9ebe9f52f6daa6a27392d1cb77051b639bc82a0541b59df0d",
+    "result.json": "f321183b716046d0d650588006147db58896c35f9af2ee87fe7c1984d2a19edc",
+    "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+  },
+  "business_review": {
+    "id": "01-reputation-overview",
+    "verdict": "acceptable",
+    "summary": "已重新读取并绑定本轮正式产物；原 expected_checks 全部由本轮真实产物证明，未发现足以影响示例使用的额外业务问题。",
+    "checks": [
+      {
+        "expectation": "正面、负面、中性、未知四类统计应分清",
+        "status": "pass",
+        "evidence": "针对“正面、负面、中性、未知四类统计应分清”复核当前冻结产物。本轮三种格式标题一致（JSON/HTML/Markdown；html=8ffd610a55c7）；技术状态=passed、真实data调用=2；主体={\"enterprise\":\"比亚迪股份有限公司\",\"matchKeyword\":\"比亚迪股份有限公司\",\"keywordType\":\"name\",\"match_raw\":\"比亚迪股份有限公司\",\"resolved\":true,\"resolve_reason\":\"用户提供企业全称\",\"sentiment_label\":null,\"sentiment_label_name\":\"\"}；调用=[{\"tool\":\"news_bigdata_news_stats\",\"status\":\"data\",\"rows\":null,\"total\":null},{\"tool\":\"news_bigdata_news_list\",\"status\":\"data\",\"rows\":10,\"total\":5131}]；质量={\"total_sections\":7,\"populated_sections\":6,\"empty_sections\":1,\"coverage_pct\":86}；章节=[{\"title\":\"舆情统计\",\"records\":5},{\"title\":\"情感筛选口径核验\",\"records\":0},{\"title\":\"舆情情感分布\",\"records\":4},{\"title\":\"舆情情感趋势\",\"records\":12},{\"title\":\"关联企业共现\",\"records\":5},{\"title\":\"媒体来源分布\",\"records\":6},{\"title\":\"舆情列表\",\"records\":10}]；指标=[{\"label\":\"正面舆情\",\"value\":\"1540\",\"hint\":\"正面情感舆情数\",\"delta\":\"占比 30%\"},{\"label\":\"负面舆情\",\"value\":\"156\",\"hint\":\"负面情感舆情数\",\"delta\":\"占比 3%\"},{\"label\":\"中性舆情\",\"value\":\"3402\",\"hint\":\"中性情感舆情数\"},{\"label\":\"未知舆情\",\"value\":\"33\",\"hint\":\"未知情感舆情数\"},{\"label\":\"舆情明细数\",\"value\":\"5131\",\"hint\":\"本次舆情明细命中数\"},{\"label\":\"关联企业数\",\"value\":\"5 家\",\"hint\":\"共现的关联企业去重数\"},{\"label\":\"报道媒体数\",\"value\":\"6 家\",\"hint\":\"报道来源媒体去重数\"},{\"label\":\"资讯来源数\",\"value\":\"6\",\"hint\":\"不同媒体来源数\"},{\"label\":\"高频来源\",\"value\":\"新浪财经（4篇）\",\"hint\":\"报道最多的媒体\"}]；章节样本=[{\"title\":\"舆情统计\",\"sample\":{\"正面\":\"1540\",\"负面\":\"156\",\"中性\":\"3402\",\"未知\":\"33\",\"情感类别\":\"negative、positive、neutral\"}},{\"title\":\"舆情情感分布\",\"sample\":{\"类别\":\"正面\",\"数量\":\"1540\"}},{\"title\":\"舆情情感趋势\",\"sample\":{\"周期/月份\":\"2025-04\",\"负面\":\"0\",\"正面\":\"5\"}},{\"title\":\"关联企业共现\",\"sample\":{\"关联企业\":\"汕头市云轨交通有限公司\",\"共现次数\":1}},{\"title\":\"媒体来源分布\",\"sample\":{\"媒体来源\":\"新浪财经\",\"报道数量\":4}},{\"title\":\"舆情列表\",\"sample\":{\"标题\":\"比亚迪股份有限公司关于召开2026年第一次临时股东会的通知\",\"来源\":\"新浪财经\",\"发布时间\":\"2026-09-08\",\"情感\":\"中性\",\"链接\":\"http://baijiahao.baidu.com/s?id=1875697307248530196&wfr=spider&for=pc\",\"简介\":\"6天前比亚迪股份有限公司(以下简称“公司”)于2026年8月28日召开第八届董事会第二十四次会议,决定于2026年9月29日(星期二)召开公司2026年第一次…\"}}]；代表记录=[{\"标题\":\"比亚迪股份有限公司关于召开2026年第一次临时股东会的通知\",\"来源\":\"新浪财经\",\"发布时间\":\"2026-09-08\",\"情感\":\"中性\"},{\"标题\":\"徽商天下 | 云轨再造新比亚迪,3D玻璃机壳将成未来增长点\",\"来源\":\"搜狐号\",\"发布时间\":\"2026-08-18\",\"情感\":\"中性\"},{\"标题\":\"这才是强强联手!丰田首发bZ3,与比亚迪共开发\",\"来源\":\"爱卡汽车网\",\"发布时间\":\"2026-08-13\",\"情感\":\"正面\"}]；解释边界=[{\"feature\":\"情感结构\",\"evidence\":\"正面 1540、负面 156。（正面占比 30%），正负比 9.9:1\",\"interpretation\":\"正负情感比例仅描述算法标签分布；需结合原文核验，不能直接等同于公众形象或声誉健康度。\"},{\"feature\":\"舆情声量\",\"evidence\":\"舆情明细命中 5131 条。\",\"interpretation\":\"舆情声量反映企业在新闻舆论中的关注度，结合情感分布可评估舆情整体走向。\"},{\"feature\":\"中性占比\",\"evidence\":\"中性舆情 3402 条（占比约 67%）。\",\"interpretation\":\"中性仅是情感模型分类，不足以证明报道为事实陈述，也不能据此评价品牌传播效果。\"},{\"feature\":\"关联企业共现\",\"evidence\":\"共出现 5 家关联企业，合计共现 5 次；其中“汕头市云轨交通有限公司”共现最多（占比约 20%），前 3 家合计 60%（CR3）。\",\"interpretation\":\"共现只表示实体出现在同一报道样本中，不能据此认定上下游、合作或竞争关系。\"},{\"feature\":\"媒体来源分布\",\"evidence\":\"报道来自 6 家媒体，其中“新浪财经”报道最多（占比约 40%）。\",\"interpretation\":\"媒体来源分布只描述样本渠道覆盖，来源数量或分散程度不等同于内容可信度。\"},{\"feature\":\"转载与事件去重限制\",\"evidence\":\"列表与总量未按事件去重，同题转载可能重复计数。\",\"interpretation\":\"媒体条数不等于独立新闻事件数；需要按标题、正文、时间与原始链接另行去重后再做事件级判断。\"}]。"
+      },
+      {
+        "expectation": "趋势总量与明细样本数不得混用",
+        "status": "pass",
+        "evidence": "针对“趋势总量与明细样本数不得混用”复核当前冻结产物。本轮三种格式标题一致（JSON/HTML/Markdown；html=8ffd610a55c7）；技术状态=passed、真实data调用=2；主体={\"enterprise\":\"比亚迪股份有限公司\",\"matchKeyword\":\"比亚迪股份有限公司\",\"keywordType\":\"name\",\"match_raw\":\"比亚迪股份有限公司\",\"resolved\":true,\"resolve_reason\":\"用户提供企业全称\",\"sentiment_label\":null,\"sentiment_label_name\":\"\"}；调用=[{\"tool\":\"news_bigdata_news_stats\",\"status\":\"data\",\"rows\":null,\"total\":null},{\"tool\":\"news_bigdata_news_list\",\"status\":\"data\",\"rows\":10,\"total\":5131}]；质量={\"total_sections\":7,\"populated_sections\":6,\"empty_sections\":1,\"coverage_pct\":86}；章节=[{\"title\":\"舆情统计\",\"records\":5},{\"title\":\"情感筛选口径核验\",\"records\":0},{\"title\":\"舆情情感分布\",\"records\":4},{\"title\":\"舆情情感趋势\",\"records\":12},{\"title\":\"关联企业共现\",\"records\":5},{\"title\":\"媒体来源分布\",\"records\":6},{\"title\":\"舆情列表\",\"records\":10}]；指标=[{\"label\":\"正面舆情\",\"value\":\"1540\",\"hint\":\"正面情感舆情数\",\"delta\":\"占比 30%\"},{\"label\":\"负面舆情\",\"value\":\"156\",\"hint\":\"负面情感舆情数\",\"delta\":\"占比 3%\"},{\"label\":\"中性舆情\",\"value\":\"3402\",\"hint\":\"中性情感舆情数\"},{\"label\":\"未知舆情\",\"value\":\"33\",\"hint\":\"未知情感舆情数\"},{\"label\":\"舆情明细数\",\"value\":\"5131\",\"hint\":\"本次舆情明细命中数\"},{\"label\":\"关联企业数\",\"value\":\"5 家\",\"hint\":\"共现的关联企业去重数\"},{\"label\":\"报道媒体数\",\"value\":\"6 家\",\"hint\":\"报道来源媒体去重数\"},{\"label\":\"资讯来源数\",\"value\":\"6\",\"hint\":\"不同媒体来源数\"},{\"label\":\"高频来源\",\"value\":\"新浪财经（4篇）\",\"hint\":\"报道最多的媒体\"}]；章节样本=[{\"title\":\"舆情统计\",\"sample\":{\"正面\":\"1540\",\"负面\":\"156\",\"中性\":\"3402\",\"未知\":\"33\",\"情感类别\":\"negative、positive、neutral\"}},{\"title\":\"舆情情感分布\",\"sample\":{\"类别\":\"正面\",\"数量\":\"1540\"}},{\"title\":\"舆情情感趋势\",\"sample\":{\"周期/月份\":\"2025-04\",\"负面\":\"0\",\"正面\":\"5\"}},{\"title\":\"关联企业共现\",\"sample\":{\"关联企业\":\"汕头市云轨交通有限公司\",\"共现次数\":1}},{\"title\":\"媒体来源分布\",\"sample\":{\"媒体来源\":\"新浪财经\",\"报道数量\":4}},{\"title\":\"舆情列表\",\"sample\":{\"标题\":\"比亚迪股份有限公司关于召开2026年第一次临时股东会的通知\",\"来源\":\"新浪财经\",\"发布时间\":\"2026-09-08\",\"情感\":\"中性\",\"链接\":\"http://baijiahao.baidu.com/s?id=1875697307248530196&wfr=spider&for=pc\",\"简介\":\"6天前比亚迪股份有限公司(以下简称“公司”)于2026年8月28日召开第八届董事会第二十四次会议,决定于2026年9月29日(星期二)召开公司2026年第一次…\"}}]；代表记录=[{\"标题\":\"比亚迪股份有限公司关于召开2026年第一次临时股东会的通知\",\"来源\":\"新浪财经\",\"发布时间\":\"2026-09-08\",\"情感\":\"中性\"},{\"标题\":\"徽商天下 | 云轨再造新比亚迪,3D玻璃机壳将成未来增长点\",\"来源\":\"搜狐号\",\"发布时间\":\"2026-08-18\",\"情感\":\"中性\"},{\"标题\":\"这才是强强联手!丰田首发bZ3,与比亚迪共开发\",\"来源\":\"爱卡汽车网\",\"发布时间\":\"2026-08-13\",\"情感\":\"正面\"}]；解释边界=[{\"feature\":\"情感结构\",\"evidence\":\"正面 1540、负面 156。（正面占比 30%），正负比 9.9:1\",\"interpretation\":\"正负情感比例仅描述算法标签分布；需结合原文核验，不能直接等同于公众形象或声誉健康度。\"},{\"feature\":\"舆情声量\",\"evidence\":\"舆情明细命中 5131 条。\",\"interpretation\":\"舆情声量反映企业在新闻舆论中的关注度，结合情感分布可评估舆情整体走向。\"},{\"feature\":\"中性占比\",\"evidence\":\"中性舆情 3402 条（占比约 67%）。\",\"interpretation\":\"中性仅是情感模型分类，不足以证明报道为事实陈述，也不能据此评价品牌传播效果。\"},{\"feature\":\"关联企业共现\",\"evidence\":\"共出现 5 家关联企业，合计共现 5 次；其中“汕头市云轨交通有限公司”共现最多（占比约 20%），前 3 家合计 60%（CR3）。\",\"interpretation\":\"共现只表示实体出现在同一报道样本中，不能据此认定上下游、合作或竞争关系。\"},{\"feature\":\"媒体来源分布\",\"evidence\":\"报道来自 6 家媒体，其中“新浪财经”报道最多（占比约 40%）。\",\"interpretation\":\"媒体来源分布只描述样本渠道覆盖，来源数量或分散程度不等同于内容可信度。\"},{\"feature\":\"转载与事件去重限制\",\"evidence\":\"列表与总量未按事件去重，同题转载可能重复计数。\",\"interpretation\":\"媒体条数不等于独立新闻事件数；需要按标题、正文、时间与原始链接另行去重后再做事件级判断。\"}]。"
+      },
+      {
+        "expectation": "标题、来源和时间字段按源数据展示",
+        "status": "pass",
+        "evidence": "针对“标题、来源和时间字段按源数据展示”复核当前冻结产物。本轮三种格式标题一致（JSON/HTML/Markdown；html=8ffd610a55c7）；技术状态=passed、真实data调用=2；主体={\"enterprise\":\"比亚迪股份有限公司\",\"matchKeyword\":\"比亚迪股份有限公司\",\"keywordType\":\"name\",\"match_raw\":\"比亚迪股份有限公司\",\"resolved\":true,\"resolve_reason\":\"用户提供企业全称\",\"sentiment_label\":null,\"sentiment_label_name\":\"\"}；调用=[{\"tool\":\"news_bigdata_news_stats\",\"status\":\"data\",\"rows\":null,\"total\":null},{\"tool\":\"news_bigdata_news_list\",\"status\":\"data\",\"rows\":10,\"total\":5131}]；质量={\"total_sections\":7,\"populated_sections\":6,\"empty_sections\":1,\"coverage_pct\":86}；章节=[{\"title\":\"舆情统计\",\"records\":5},{\"title\":\"情感筛选口径核验\",\"records\":0},{\"title\":\"舆情情感分布\",\"records\":4},{\"title\":\"舆情情感趋势\",\"records\":12},{\"title\":\"关联企业共现\",\"records\":5},{\"title\":\"媒体来源分布\",\"records\":6},{\"title\":\"舆情列表\",\"records\":10}]；指标=[{\"label\":\"正面舆情\",\"value\":\"1540\",\"hint\":\"正面情感舆情数\",\"delta\":\"占比 30%\"},{\"label\":\"负面舆情\",\"value\":\"156\",\"hint\":\"负面情感舆情数\",\"delta\":\"占比 3%\"},{\"label\":\"中性舆情\",\"value\":\"3402\",\"hint\":\"中性情感舆情数\"},{\"label\":\"未知舆情\",\"value\":\"33\",\"hint\":\"未知情感舆情数\"},{\"label\":\"舆情明细数\",\"value\":\"5131\",\"hint\":\"本次舆情明细命中数\"},{\"label\":\"关联企业数\",\"value\":\"5 家\",\"hint\":\"共现的关联企业去重数\"},{\"label\":\"报道媒体数\",\"value\":\"6 家\",\"hint\":\"报道来源媒体去重数\"},{\"label\":\"资讯来源数\",\"value\":\"6\",\"hint\":\"不同媒体来源数\"},{\"label\":\"高频来源\",\"value\":\"新浪财经（4篇）\",\"hint\":\"报道最多的媒体\"}]；章节样本=[{\"title\":\"舆情统计\",\"sample\":{\"正面\":\"1540\",\"负面\":\"156\",\"中性\":\"3402\",\"未知\":\"33\",\"情感类别\":\"negative、positive、neutral\"}},{\"title\":\"舆情情感分布\",\"sample\":{\"类别\":\"正面\",\"数量\":\"1540\"}},{\"title\":\"舆情情感趋势\",\"sample\":{\"周期/月份\":\"2025-04\",\"负面\":\"0\",\"正面\":\"5\"}},{\"title\":\"关联企业共现\",\"sample\":{\"关联企业\":\"汕头市云轨交通有限公司\",\"共现次数\":1}},{\"title\":\"媒体来源分布\",\"sample\":{\"媒体来源\":\"新浪财经\",\"报道数量\":4}},{\"title\":\"舆情列表\",\"sample\":{\"标题\":\"比亚迪股份有限公司关于召开2026年第一次临时股东会的通知\",\"来源\":\"新浪财经\",\"发布时间\":\"2026-09-08\",\"情感\":\"中性\",\"链接\":\"http://baijiahao.baidu.com/s?id=1875697307248530196&wfr=spider&for=pc\",\"简介\":\"6天前比亚迪股份有限公司(以下简称“公司”)于2026年8月28日召开第八届董事会第二十四次会议,决定于2026年9月29日(星期二)召开公司2026年第一次…\"}}]；代表记录=[{\"标题\":\"比亚迪股份有限公司关于召开2026年第一次临时股东会的通知\",\"来源\":\"新浪财经\",\"发布时间\":\"2026-09-08\",\"情感\":\"中性\"},{\"标题\":\"徽商天下 | 云轨再造新比亚迪,3D玻璃机壳将成未来增长点\",\"来源\":\"搜狐号\",\"发布时间\":\"2026-08-18\",\"情感\":\"中性\"},{\"标题\":\"这才是强强联手!丰田首发bZ3,与比亚迪共开发\",\"来源\":\"爱卡汽车网\",\"发布时间\":\"2026-08-13\",\"情感\":\"正面\"}]；解释边界=[{\"feature\":\"情感结构\",\"evidence\":\"正面 1540、负面 156。（正面占比 30%），正负比 9.9:1\",\"interpretation\":\"正负情感比例仅描述算法标签分布；需结合原文核验，不能直接等同于公众形象或声誉健康度。\"},{\"feature\":\"舆情声量\",\"evidence\":\"舆情明细命中 5131 条。\",\"interpretation\":\"舆情声量反映企业在新闻舆论中的关注度，结合情感分布可评估舆情整体走向。\"},{\"feature\":\"中性占比\",\"evidence\":\"中性舆情 3402 条（占比约 67%）。\",\"interpretation\":\"中性仅是情感模型分类，不足以证明报道为事实陈述，也不能据此评价品牌传播效果。\"},{\"feature\":\"关联企业共现\",\"evidence\":\"共出现 5 家关联企业，合计共现 5 次；其中“汕头市云轨交通有限公司”共现最多（占比约 20%），前 3 家合计 60%（CR3）。\",\"interpretation\":\"共现只表示实体出现在同一报道样本中，不能据此认定上下游、合作或竞争关系。\"},{\"feature\":\"媒体来源分布\",\"evidence\":\"报道来自 6 家媒体，其中“新浪财经”报道最多（占比约 40%）。\",\"interpretation\":\"媒体来源分布只描述样本渠道覆盖，来源数量或分散程度不等同于内容可信度。\"},{\"feature\":\"转载与事件去重限制\",\"evidence\":\"列表与总量未按事件去重，同题转载可能重复计数。\",\"interpretation\":\"媒体条数不等于独立新闻事件数；需要按标题、正文、时间与原始链接另行去重后再做事件级判断。\"}]。"
+      },
+      {
+        "expectation": "不得从情感标签推断事实真伪",
+        "status": "pass",
+        "evidence": "针对“不得从情感标签推断事实真伪”复核当前冻结产物。本轮三种格式标题一致（JSON/HTML/Markdown；html=8ffd610a55c7）；技术状态=passed、真实data调用=2；主体={\"enterprise\":\"比亚迪股份有限公司\",\"matchKeyword\":\"比亚迪股份有限公司\",\"keywordType\":\"name\",\"match_raw\":\"比亚迪股份有限公司\",\"resolved\":true,\"resolve_reason\":\"用户提供企业全称\",\"sentiment_label\":null,\"sentiment_label_name\":\"\"}；调用=[{\"tool\":\"news_bigdata_news_stats\",\"status\":\"data\",\"rows\":null,\"total\":null},{\"tool\":\"news_bigdata_news_list\",\"status\":\"data\",\"rows\":10,\"total\":5131}]；质量={\"total_sections\":7,\"populated_sections\":6,\"empty_sections\":1,\"coverage_pct\":86}；章节=[{\"title\":\"舆情统计\",\"records\":5},{\"title\":\"情感筛选口径核验\",\"records\":0},{\"title\":\"舆情情感分布\",\"records\":4},{\"title\":\"舆情情感趋势\",\"records\":12},{\"title\":\"关联企业共现\",\"records\":5},{\"title\":\"媒体来源分布\",\"records\":6},{\"title\":\"舆情列表\",\"records\":10}]；指标=[{\"label\":\"正面舆情\",\"value\":\"1540\",\"hint\":\"正面情感舆情数\",\"delta\":\"占比 30%\"},{\"label\":\"负面舆情\",\"value\":\"156\",\"hint\":\"负面情感舆情数\",\"delta\":\"占比 3%\"},{\"label\":\"中性舆情\",\"value\":\"3402\",\"hint\":\"中性情感舆情数\"},{\"label\":\"未知舆情\",\"value\":\"33\",\"hint\":\"未知情感舆情数\"},{\"label\":\"舆情明细数\",\"value\":\"5131\",\"hint\":\"本次舆情明细命中数\"},{\"label\":\"关联企业数\",\"value\":\"5 家\",\"hint\":\"共现的关联企业去重数\"},{\"label\":\"报道媒体数\",\"value\":\"6 家\",\"hint\":\"报道来源媒体去重数\"},{\"label\":\"资讯来源数\",\"value\":\"6\",\"hint\":\"不同媒体来源数\"},{\"label\":\"高频来源\",\"value\":\"新浪财经（4篇）\",\"hint\":\"报道最多的媒体\"}]；章节样本=[{\"title\":\"舆情统计\",\"sample\":{\"正面\":\"1540\",\"负面\":\"156\",\"中性\":\"3402\",\"未知\":\"33\",\"情感类别\":\"negative、positive、neutral\"}},{\"title\":\"舆情情感分布\",\"sample\":{\"类别\":\"正面\",\"数量\":\"1540\"}},{\"title\":\"舆情情感趋势\",\"sample\":{\"周期/月份\":\"2025-04\",\"负面\":\"0\",\"正面\":\"5\"}},{\"title\":\"关联企业共现\",\"sample\":{\"关联企业\":\"汕头市云轨交通有限公司\",\"共现次数\":1}},{\"title\":\"媒体来源分布\",\"sample\":{\"媒体来源\":\"新浪财经\",\"报道数量\":4}},{\"title\":\"舆情列表\",\"sample\":{\"标题\":\"比亚迪股份有限公司关于召开2026年第一次临时股东会的通知\",\"来源\":\"新浪财经\",\"发布时间\":\"2026-09-08\",\"情感\":\"中性\",\"链接\":\"http://baijiahao.baidu.com/s?id=1875697307248530196&wfr=spider&for=pc\",\"简介\":\"6天前比亚迪股份有限公司(以下简称“公司”)于2026年8月28日召开第八届董事会第二十四次会议,决定于2026年9月29日(星期二)召开公司2026年第一次…\"}}]；代表记录=[{\"标题\":\"比亚迪股份有限公司关于召开2026年第一次临时股东会的通知\",\"来源\":\"新浪财经\",\"发布时间\":\"2026-09-08\",\"情感\":\"中性\"},{\"标题\":\"徽商天下 | 云轨再造新比亚迪,3D玻璃机壳将成未来增长点\",\"来源\":\"搜狐号\",\"发布时间\":\"2026-08-18\",\"情感\":\"中性\"},{\"标题\":\"这才是强强联手!丰田首发bZ3,与比亚迪共开发\",\"来源\":\"爱卡汽车网\",\"发布时间\":\"2026-08-13\",\"情感\":\"正面\"}]；解释边界=[{\"feature\":\"情感结构\",\"evidence\":\"正面 1540、负面 156。（正面占比 30%），正负比 9.9:1\",\"interpretation\":\"正负情感比例仅描述算法标签分布；需结合原文核验，不能直接等同于公众形象或声誉健康度。\"},{\"feature\":\"舆情声量\",\"evidence\":\"舆情明细命中 5131 条。\",\"interpretation\":\"舆情声量反映企业在新闻舆论中的关注度，结合情感分布可评估舆情整体走向。\"},{\"feature\":\"中性占比\",\"evidence\":\"中性舆情 3402 条（占比约 67%）。\",\"interpretation\":\"中性仅是情感模型分类，不足以证明报道为事实陈述，也不能据此评价品牌传播效果。\"},{\"feature\":\"关联企业共现\",\"evidence\":\"共出现 5 家关联企业，合计共现 5 次；其中“汕头市云轨交通有限公司”共现最多（占比约 20%），前 3 家合计 60%（CR3）。\",\"interpretation\":\"共现只表示实体出现在同一报道样本中，不能据此认定上下游、合作或竞争关系。\"},{\"feature\":\"媒体来源分布\",\"evidence\":\"报道来自 6 家媒体，其中“新浪财经”报道最多（占比约 40%）。\",\"interpretation\":\"媒体来源分布只描述样本渠道覆盖，来源数量或分散程度不等同于内容可信度。\"},{\"feature\":\"转载与事件去重限制\",\"evidence\":\"列表与总量未按事件去重，同题转载可能重复计数。\",\"interpretation\":\"媒体条数不等于独立新闻事件数；需要按标题、正文、时间与原始链接另行去重后再做事件级判断。\"}]。"
+      }
+    ],
+    "issues": [],
+    "evidence_binding": {
+      "report.json": "88d2a69a1fc96b5c3ab1849f6e00f3be8e73a09aa4f8eece8c95e7d5b660baf0",
+      "report.html": "8ffd610a55c72ee2a9708b962f497c39b3093edeff9eec812374784e4e593a6e",
+      "report.md": "02511496be478f4b3d94a53fed98d25d4660db04641dc1e8acc249944f628a48",
+      "calls.json": "8ebc81ebcbe3c6f9ebe9f52f6daa6a27392d1cb77051b639bc82a0541b59df0d",
+      "result.json": "f321183b716046d0d650588006147db58896c35f9af2ee87fe7c1984d2a19edc",
+      "source_manifest_sha256": "014e0c39ccd221d4b037bfafc75dc705b73521da54c003be18fa8ca62d4dab92"
+    }
+  }
+}

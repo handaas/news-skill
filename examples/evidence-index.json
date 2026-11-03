@@ -1,0 +1,95 @@
+{
+  "run_id": "live-replaced-20261027",
+  "cases": [
+    {
+      "skill": "news-skill",
+      "id": "01-reputation-overview",
+      "status": "passed",
+      "positive_business_pass": true,
+      "files_sha256": {
+        "report.json": "88d2a69a1fc96b5c3ab1849f6e00f3be8e73a09aa4f8eece8c95e7d5b660baf0",
+        "report.html": "8ffd610a55c72ee2a9708b962f497c39b3093edeff9eec812374784e4e593a6e",
+        "report.md": "02511496be478f4b3d94a53fed98d25d4660db04641dc1e8acc249944f628a48",
+        "calls.json": "8ebc81ebcbe3c6f9ebe9f52f6daa6a27392d1cb77051b639bc82a0541b59df0d",
+        "result.json": "f321183b716046d0d650588006147db58896c35f9af2ee87fe7c1984d2a19edc",
+        "audit.json": "1036c80fe17637219fb917cade9ba41b36cdd49f9a1f8f64e9de34242bc22e89",
+        "acceptance.json": "e14c3eaa03dec6e2353f1da2b9585d70cc797d352226de62df0b78c126754a87",
+        "business-review.json": "1273aac4439c932fbab074673ff70d04e8cc512946f733ff6cbb9d1aeb263687",
+        "browser-check.json": "d049b6403fefa95b3f5b47b94b1fde7b1ef7c0543f57926ec4e8d0e9aed26be0"
+      },
+      "audit_record": "../../test-records/live-replaced-20261027/01-reputation-overview.md"
+    },
+    {
+      "skill": "news-skill",
+      "id": "02-negative-watch",
+      "status": "passed",
+      "positive_business_pass": true,
+      "files_sha256": {
+        "report.json": "3d07369a328b6af1c20fe2abc6ce6dd7ae0cf7f93ca1af9cfb550080d8145da0",
+        "report.html": "cb4f145a1c78be2bd2b16e18d27c8d2ab50d971ce9dad9ed5e562a7f382e79df",
+        "report.md": "440c68a9a2ff64569bc6877c6710d510ede8ef8ab0189a2baa99d28412200364",
+        "calls.json": "cd7730f9879f1673b852221c6181099edfd1deb5940e9f83c79bb07cfa24ed3e",
+        "result.json": "d4cc5b047d2762c66ba1a1817563b2f5acf92f89a0d21bed97b794cc60f2a64e",
+        "audit.json": "1bcdaa1caf17396b401615762f2acb324ba7730f0f39d6fc3a5a4d5d624871be",
+        "acceptance.json": "6b57c630759552069ef9768368cc7eef0bb4a22a301b2a64be92ca5e679e7f57",
+        "business-review.json": "b231ff29d8f70eca9a4531a6bc49a616539e4791e0cf3967a48c2398c5e6092d",
+        "browser-check.json": "f351a7775c1b6fe754b9b7858aebb524b2052f6c50f0f6e096e4c389ee1d3f3c"
+      },
+      "audit_record": "../../test-records/live-replaced-20261027/02-negative-watch.md"
+    },
+    {
+      "skill": "news-skill",
+      "id": "03-positive-coverage",
+      "status": "passed",
+      "positive_business_pass": true,
+      "files_sha256": {
+        "report.json": "1961ffb27873e8a8c655ab69d446f6d000fd71f2b2f78b38c7c0d9322341e48e",
+        "report.html": "ea8f0862e7ad1254935f80f190e24fab786e337955b35874bb30ef794b0a6b41",
+        "report.md": "340715febb67a8274a8c03d99f68df0bf39c73e4831758d3acf4c3f41f57a77f",
+        "calls.json": "bdcaf404a2128fa7cd3a1844e3d17815f35634f92fabbf8fea9eadb34315170e",
+        "result.json": "b8d51a60f32043cd7210f2731ea596670ef2206c3b84c6b454167d30196551a8",
+        "audit.json": "f58a6eacdc9067d5adb49cebf15337afb102ca9da06ef9d8ada73f5126d71f0e",
+        "acceptance.json": "1e6739c209bf4bb344afb4f640be0f54da80c0f835cd200ce1c989cfebd8e562",
+        "business-review.json": "55d09941a2d1f055d7b9ac2851c3ee9b7683dc167c664f03c8e386c99896f4b4",
+        "browser-check.json": "2a5be1519d87f7ef9079c053ec0b21ec38b751d81aa5a4fa14bb6fee20f7a267"
+      },
+      "audit_record": "../../test-records/live-replaced-20261027/03-positive-coverage.md"
+    },
+    {
+      "skill": "news-skill",
+      "id": "04-neutral-watch",
+      "status": "passed",
+      "positive_business_pass": true,
+      "files_sha256": {
+        "report.json": "399db6ca4b643bdb15649c34b7b23cf921757e319ba38f74147db0258312ac2d",
+        "report.html": "73961796aabe0d6b24def18b78708970a3e158d42d2ac1acdc5953aa1549c5fa",
+        "report.md": "3c4b194d446ef90a26ad88f5b04dcecc90b53a49180ee457054816e38ae322ba",
+        "calls.json": "79daffe14c5bca2b1a2d1c968a61d7c098309bfd514880848de640b3800369e3",
+        "result.json": "8e0f750a90014437b0eeea6d1a9a04a415d714ff7fb81703a0ebc595dbac9683",
+        "audit.json": "11883b42a8b08839c085e606778f3483f275df291c5ce84ae9b96d6408149fa7",
+        "acceptance.json": "63d824212653ea2fa177c4c773d0fa7620da3b83700bd4a6d9ea0267bbd4ee1a",
+        "business-review.json": "4f049cd0d0f0092f057c3e6b04805b9c40edb8714fa335d071e3543b527f7546",
+        "browser-check.json": "21b6ecc928a21d280124676a5b114e5d9f24237d0877873c21563de10877aae5"
+      },
+      "audit_record": "../../test-records/live-replaced-20261027/04-neutral-watch.md"
+    },
+    {
+      "skill": "news-skill",
+      "id": "07-compact-news",
+      "status": "passed",
+      "positive_business_pass": true,
+      "files_sha256": {
+        "report.json": "b6739c7819994205359ae20fdaf1f8320e90f5df84ddee910c150ffca473faf6",
+        "report.html": "fdc07915d2072832dd6edb8337d87f29b363ca18bbbee3d4ff4a7ff3d064091c",
+        "report.md": "5ebf58e0002d830a4196dd590788428635fada0d2474006b9dca8ab7f9eb2628",
+        "calls.json": "86d5d383b1e88a52729f47b488436ca4cfc60e013148ee7c9b9aab4d1c406f6c",
+        "result.json": "5152867ab565ab855b7bc69f91cd600fec584b77a54f39a9e9cfda362de3d012",
+        "audit.json": "9ade23698d7438760c15301af89c0f347c5b2262396982099cd303966d0ed6a0",
+        "acceptance.json": "6444c3e8fc5bd7cfa82758c136398498b0781bff38ad02316cb115af588559f1",
+        "business-review.json": "f922f2803deb82ce5044281e2cbdc61de163c08c79a3d0333e5f43b9b50c0558",
+        "browser-check.json": "eb46c82cc84a54a6e7580f0147a4ee53e0acc35db21cba7899de7e9b686537cb"
+      },
+      "audit_record": "../../test-records/live-replaced-20261027/07-compact-news.md"
+    }
+  ]
+}

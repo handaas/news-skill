@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "skill": "news-skill",
+  "case_id": "02-negative-watch",
+  "title": "负面舆情专项监测",
+  "invocation_id": "1793069165447636000",
+  "provenance": {
+    "integrator_id": "683e574805537ace146cc05e",
+    "runner_sha256": "05777c2f2b0791cb5157aef691206606dade8df7af3b17212285b7ae74632a66",
+    "credential_policy_sha256": "bcabf08a1ca92f28357c0e57a8bae9bfa910eb1d4b204d8195ee3b7a77106eed",
+    "scenario_sha256": "743d95e800e63933bebc39df5f54de05b26dfb828edc87e0d0b1667a19c03d82",
+    "skill_source_hashes": {
+      "scripts/common.py": "f9b5347c246cff6daacde89c7e6dfa4e23f423c18ee57fb59209d15a8af98da2",
+      "scripts/compose_report.py": "bf339fc558a3b415f8c90a20e49f4f6e7b51c88afb5b93a9efae29d3b822278a",
+      "scripts/mcp_client.py": "440fedaafdc35bedb81f701a1500dc591633f5544c5a26e4acb6fcbdb88bcf16",
+      "scripts/render_report.py": "405acb3d0e7991be10052612ca16d6d9cb3ad8617e30beda308d84dcd31746de",
+      "scripts/validate_config.py": "5e8bdf6b1fc1efb1300043d4188c0fcd2813375133bda16ebb49cdcf60547170"
+    },
+    "upstream_source_hashes": {
+      "news-mcp-server": "e1ef4df6b49d8e02d53fd98a1576243ce2a8ba8a534e8dab92f9f7af23f55a5f"
+    },
+    "upstream_dependency_hashes": {
+      "news-mcp-server/server/mcp_server.py": "e1ef4df6b49d8e02d53fd98a1576243ce2a8ba8a534e8dab92f9f7af23f55a5f"
+    }
+  },
+  "source_changed_during_run": false,
+  "started_at": "2026-10-27T10:46:05+08:00",
+  "elapsed_seconds": 1.588,
+  "returncode": 0,
+  "exception_type": null,
+  "command": "python3 news-skill/scripts/compose_report.py --enterprise '华为技术有限公司' --sentiment 0 --page-size 10 --output news-skill/output/live-replaced-20261027/02-negative-watch/report.json --report-output news-skill/output/live-replaced-20261027/02-negative-watch/report.html",
+  "transport": "local MCP servers via loopback streamable-http",
+  "cache_used": false,
+  "call_count": 2,
+  "successful_data_calls": 2,
+  "empty_calls": 0,
+  "failed_calls": 0,
+  "checks": {
+    "issues": [],
+    "warnings": [],
+    "coverage_pct": 100,
+    "subject": {
+      "enterprise": "华为技术有限公司",
+      "matchKeyword": "华为技术有限公司",
+      "keywordType": "name",
+      "match_raw": "华为技术有限公司",
+      "resolved": true,
+      "resolve_reason": "用户提供企业全称",
+      "sentiment_label": 0,
+      "sentiment_label_name": "负面"
+    },
+    "title": "华为技术有限公司 舆情大数据报告",
+    "data_mode": null,
+    "metrics": [
+      {
+        "label": "正面舆情",
+        "value": "4617",
+        "hint": "正面情感舆情数",
+        "delta": "占比 54%"
+      },
+      {
+        "label": "负面舆情",
+        "value": "307",
+        "hint": "负面情感舆情数",
+        "delta": "占比 4%"
+      },
+      {
+        "label": "中性舆情",
+        "value": "3670",
+        "hint": "中性情感舆情数"
+      },
+      {
+        "label": "未知舆情",
+        "value": "18",
+        "hint": "未知情感舆情数"
+      },
+      {
+        "label": "舆情明细数",
+        "value": "307",
+        "hint": "本次舆情明细命中数"
+      },
+      {
+        "label": "关联企业数",
+        "value": "3 家",
+        "hint": "共现的关联企业去重数"
+      },
+      {
+        "label": "报道媒体数",
+        "value": "8 家",
+        "hint": "报道来源媒体去重数"
+      },
+      {
+        "label": "资讯来源数",
+        "value": "8",
+        "hint": "不同媒体来源数"
+      },
+      {
+        "label": "高频来源",
+        "value": "澎湃新闻（2篇）",
+        "hint": "报道最多的媒体"
+      }
+    ],
+    "quality_report": {
+      "total_sections": 7,
+      "populated_sections": 7,
+      "empty_sections": 0,
+      "coverage_pct": 100
+    },
+    "unregistered_tools": [],
+    "checks": {
+      "json_html_markdown": true,
+      "explicit_live": true,
+      "tool_calls_recorded": 2,
+      "offline_scripts": true,
+      "independent_rerender": true
+    }
+  },
+  "status": "passed",
+  "source_hashes": {
+    "scripts/common.py": "f9b5347c246cff6daacde89c7e6dfa4e23f423c18ee57fb59209d15a8af98da2",
+    "scripts/compose_report.py": "bf339fc558a3b415f8c90a20e49f4f6e7b51c88afb5b93a9efae29d3b822278a",
+    "scripts/mcp_client.py": "440fedaafdc35bedb81f701a1500dc591633f5544c5a26e4acb6fcbdb88bcf16",
+    "scripts/render_report.py": "405acb3d0e7991be10052612ca16d6d9cb3ad8617e30beda308d84dcd31746de",
+    "scripts/validate_config.py": "5e8bdf6b1fc1efb1300043d4188c0fcd2813375133bda16ebb49cdcf60547170"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "metric_overflows": [],
+  "document_title": "华为技术有限公司 舆情大数据报告",
+  "title_matches": true,
+  "charts": 4,
+  "rendered_charts": 4,
+  "zero_size_charts": 0,
+  "chart_details": [
+    {
+      "width": 984,
+      "height": 300,
+      "instance": true,
+      "renderer": true,
+      "graphics": 25
+    },
+    {
+      "width": 984,
+      "height": 300,
+      "instance": true,
+      "renderer": true,
+      "graphics": 99
+    },
+    {
+      "width": 984,
+      "height": 300,
+      "instance": true,
+      "renderer": true,
+      "graphics": 27
+    },
+    {
+      "width": 984,
+      "height": 300,
+      "instance": true,
+      "renderer": true,
+      "graphics": 45
+    }
+  ],
+  "page_width": 1905,
+  "viewport_width": 1920,
+  "empty_headers": 0,
+  "script_errors": [],
+  "external_resources": 0,
+  "external_asset_references": 0,
+  "ok": true,
+  "report_html_sha256": "cb4f145a1c78be2bd2b16e18d27c8d2ab50d971ce9dad9ed5e562a7f382e79df",
+  "report_json_sha256": "3d07369a328b6af1c20fe2abc6ce6dd7ae0cf7f93ca1af9cfb550080d8145da0",
+  "skill": "news-skill",
+  "id": "02-negative-watch",
+  "browser": "Ego Lite",
+  "space_id": 4,
+  "offline": true,
+  "checked_at": "2026-10-27T03:03:32.252Z"
+}
