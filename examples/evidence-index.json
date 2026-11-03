@@ -17,7 +17,7 @@
         "business-review.json": "1273aac4439c932fbab074673ff70d04e8cc512946f733ff6cbb9d1aeb263687",
         "browser-check.json": "d049b6403fefa95b3f5b47b94b1fde7b1ef7c0543f57926ec4e8d0e9aed26be0"
       },
-      "audit_record": "../../test-records/live-replaced-20261027/01-reputation-overview.md"
+      "audit_record": "../test-records/live-replaced-20261027/01-reputation-overview.md"
     },
     {
       "skill": "news-skill",
@@ -35,7 +35,7 @@
         "business-review.json": "b231ff29d8f70eca9a4531a6bc49a616539e4791e0cf3967a48c2398c5e6092d",
         "browser-check.json": "f351a7775c1b6fe754b9b7858aebb524b2052f6c50f0f6e096e4c389ee1d3f3c"
       },
-      "audit_record": "../../test-records/live-replaced-20261027/02-negative-watch.md"
+      "audit_record": "../test-records/live-replaced-20261027/02-negative-watch.md"
     },
     {
       "skill": "news-skill",
@@ -53,7 +53,7 @@
         "business-review.json": "55d09941a2d1f055d7b9ac2851c3ee9b7683dc167c664f03c8e386c99896f4b4",
         "browser-check.json": "2a5be1519d87f7ef9079c053ec0b21ec38b751d81aa5a4fa14bb6fee20f7a267"
       },
-      "audit_record": "../../test-records/live-replaced-20261027/03-positive-coverage.md"
+      "audit_record": "../test-records/live-replaced-20261027/03-positive-coverage.md"
     },
     {
       "skill": "news-skill",
@@ -71,7 +71,7 @@
         "business-review.json": "4f049cd0d0f0092f057c3e6b04805b9c40edb8714fa335d071e3543b527f7546",
         "browser-check.json": "21b6ecc928a21d280124676a5b114e5d9f24237d0877873c21563de10877aae5"
       },
-      "audit_record": "../../test-records/live-replaced-20261027/04-neutral-watch.md"
+      "audit_record": "../test-records/live-replaced-20261027/04-neutral-watch.md"
     },
     {
       "skill": "news-skill",
@@ -89,7 +89,7 @@
         "business-review.json": "f922f2803deb82ce5044281e2cbdc61de163c08c79a3d0333e5f43b9b50c0558",
         "browser-check.json": "eb46c82cc84a54a6e7580f0147a4ee53e0acc35db21cba7899de7e9b686537cb"
       },
-      "audit_record": "../../test-records/live-replaced-20261027/07-compact-news.md"
+      "audit_record": "../test-records/live-replaced-20261027/07-compact-news.md"
     }
   ]
 }
