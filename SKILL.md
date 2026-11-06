@@ -26,6 +26,15 @@ description: Use for generating a professional news big-data report (舆情大�
 - 报告所有章节标题、指标卡标签必须用中文；`core_analysis.sections` 的 `title` 字段必须中文，不可显示英文 key（如 `holders`、`investments`）。
 - 指标值必须可读化：金额格式为"X 亿/万 + 币种"，地址拼接省市区，比率显示百分号。详见 `references/report-output.md` 的「数据格式约束」。
 
+## 内容整理与交付审校（强制）
+
+1. **情感是标签，不是事实**：正面/负面/中性/未知均来自上游模型；不得仅凭标题或标签断言公众评价、声誉风险或企业责任。需要判断时须引用原文要点并注明“未逐条人工核验”。
+2. **媒体条数 ≠ 事件数**：先识别同题转载、重复收录和同一事件的多篇进展。只能做有证据的合并（当前仅标题完全一致）；近义标题不得自动判重。正文保留原列表供核对。
+3. **样本 ≠ 全量**：关联企业数、媒体来源数、列表条数都只代表当前明细样本，标签和提示必须写明“样本内/当前页”。统计总量是另一口径，不能与样本量相除。
+4. **趋势只比完整月份**：当前月是不完整月份，不参与环比；近两个有数据月份任一 <5 条、或最新数据距报告期超过 2 个月时，不写“近月上升/下降”。趋势序列与统计总量口径不一致时须显式说明。
+5. **证据边界**：情感结构、净声量、共现、来源集中度只描述样本；不得推断因果关系、公关效果或经营影响，不得给出未经证据支持的应对建议。
+6. 原始标题、来源、时间、链接、标签保留；正常生成与离线修订均调用 `apply_content_review(report)`，不新增外网查询。
+
 ## MCP 服务入口
 
 - MCP 服务当前名称：企业舆情洞察（连接仍使用原服务目录标识）。
@@ -69,6 +78,8 @@ description: Use for generating a professional news big-data report (舆情大�
 3. **组装统一报告**：核心分析含舆情统计（KV：正/负/中/未知）、舆情情感趋势（表）、舆情列表（表）。
 4. **渲染三件套**：`compose_report.py --enterprise ... --output ... --report-output ...` 直接产出 JSON + HTML + Markdown；或 `render_report.py --input ... --output ...` 重渲染。
 5. **返回路径**：返回 JSON、HTML、Markdown 文件路径，以及企业全称映射与数据口径（含情感过滤）。
+
+- **渲染前置检查**：执行会产出含图表 HTML / PDF 的报告命令前，先验证 `node --version` 与本 skill 自带 `assets/vendor/echarts.min.js` 存在；内嵌静态 SVG 的生成需要 Node.js（推荐当前 LTS，无需 npm 包），缺失时报告生成明确报错。查看已生成的 HTML 与 Markdown 输出不需要 Node。
 
 ## 脚本速查
 
