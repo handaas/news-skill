@@ -27,7 +27,7 @@
 2. 使用旷湖SKILL平台在线 MCP：服务地址见本 README「接入 MCP 服务」，平台返回的地址优先。不部署本地 MCP，不索要 INTEGRATOR_ID / SECRET_ID / SECRET_KEY。
 3. 将完整 handaas-token 作为环境变量 `NEWS_MCP_TOKEN` 注入运行 Python 的进程，并设置 `NEWS_MCP_URL`；环境变量必须真正到达该进程，只保存文件或在别的终端 export 不算完成。
 4. Token 原样保留逗号等字符：不拆分、不解码、不放进 URL、不手动加 Bearer。不要把 Token 写入仓库、SKILL.md、README、示例配置、报告或终端历史；若只能使用仓库外的私有环境文件，权限设为 0600，并由启动器显式加载。不要回显 Token、请求头或原始鉴权错误；Token 注意保管，请勿泄露。
-5. 正式执行真实查询：加 --live 生成 HTML / Markdown / JSON 报告；按问题范围使用默认页数预算，不为填模板扩大调用，也不重复请求。生成含图表的 HTML / PDF 报告需要 Node.js（推荐当前 LTS，无需 npm 包）：依赖检查阶段用安全可用的工具检查并在缺失时补齐 Node，不产生付费调用；查看已生成的 HTML 不需要 Node / 服务器 / 网络。
+5. 正式执行真实查询：加 --live 生成 HTML / Markdown / JSON 报告；按问题范围使用默认页数预算，不为填模板扩大调用，也不重复请求。生成含图表的 HTML / PDF 报告需要 Node.js（推荐当前 LTS，无需 npm 包）：依赖检查阶段用安全可用的工具检查并在缺失时补齐 Node，不产生付费调用；查看已生成的 HTML 不需要 Node / 服务器 / 网络。真实查询产出的是待 AI 审校草稿，须按 SKILL.md 用 review_report.py 完成实际 AI 审校并生成最终报告后再交付。
 6. 只返回脱敏结果：安装目录、私有配置位置、真实查询调用次数与数据范围、报告路径。缺少地址或 Token 时明确说明缺失项，不要把连接失败说成企业没有数据。
 
 handaas-token：<在此粘贴本人在旷湖SKILL平台获取的完整 Token>

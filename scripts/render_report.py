@@ -25,6 +25,13 @@ from typing import Any, Dict, List, Mapping, Sequence
 
 from common import json_dumps
 from static_charts import embed_static_charts
+from report_data import (
+    clean_rows,
+    has_data,
+    numeric_value,
+    section_has_data,
+    visible_sections,
+)
 
 
 # --------------------------------------------------------------------------- #
@@ -78,7 +85,7 @@ def compact(value: Any, limit: int = 0) -> str:
 
 def tag_items(value: Any) -> List[str]:
     """Readable, exact-deduplicated labels; never serialize a list as prose."""
-    if value is None or value == "":
+    if not has_data(value):
         return []
     if isinstance(value, str) and value.strip().startswith("["):
         try:
@@ -92,13 +99,17 @@ def tag_items(value: Any) -> List[str]:
     elif isinstance(value, dict):
         readable = next((value[key] for key in ("name", "label", "text", "title")
                          if isinstance(value.get(key), str)), None)
-        items = tag_items(readable) if readable is not None else [
-            f"{key}：{'、'.join(tag_items(item))}" for key, item in value.items()
-            if item not in (None, "", [], {})
-        ]
+        if readable is not None:
+            items = tag_items(readable)
+        else:
+            items = []
+            for key, item in value.items():
+                nested = tag_items(item)
+                if nested:
+                    items.append(f"{key}：{'、'.join(nested)}")
     else:
         items = [" ".join(str(value).split())]
-    return list(dict.fromkeys(item for item in items if item and item != "-"))
+    return list(dict.fromkeys(item for item in items if item and has_data(item)))
 
 
 
@@ -158,44 +169,54 @@ def _cell_html(value: Any) -> str:
     return esc(s)
 
 
-def render_table(rows: Sequence[Any], columns: Sequence[tuple[str, str]] | None = None) -> str:
-    rows = [r for r in rows if isinstance(r, dict)] if rows else []
-    if not rows:
-        return '<p class="muted">暂无数据</p>'
-    if not columns:
-        columns = [(str(k), str(k)) for k in rows[0].keys()]
-    # Auto-detect column order: a column pair may be (data_key, display_label)
-    # or (display_label, data_key). Detect by checking which side matches an
-    # actual key in the first data row, so compose specs written in either
-    # convention render correctly. Falls back to (first=label, second=key).
+
+
+def _normalize_columns(rows: Sequence[Mapping[str, Any]], columns: Sequence[tuple[str, str]] | None = None) -> List[tuple[str, str]]:
+    """Normalize (key, label) / (label, key) specs and drop empty columns."""
     sample = rows[0] if rows else {}
-    norm_cols = []
-    for pair in columns:
-        a, b = (list(pair) + [None, None])[:2]
-        a_ok = isinstance(a, str) and a in sample
-        b_ok = isinstance(b, str) and b in sample
-        if a_ok and not b_ok:
-            key, label = a, (b if b else a)  # (key, label)
-        elif b_ok and not a_ok:
-            key, label = b, (a if a else b)  # (label, key) -> normalize
-        elif a_ok and b_ok:
-            key, label = a, b  # both are keys; use first as key
+    normalized: List[tuple[str, str]] = []
+    for pair in columns or []:
+        if not isinstance(pair, (list, tuple)) or not pair:
+            continue
+        first, second = (list(pair) + [None, None])[:2]
+        first_ok = isinstance(first, str) and first in sample
+        second_ok = isinstance(second, str) and second in sample
+        if first_ok and second_ok:
+            key, label = first, second
+        elif second_ok:
+            key, label = second, first
         else:
-            # Neither matches a real key; assume (key, label) convention
-            key, label = (a or ""), (b or a or "")
-        norm_cols.append((key, label))
-    head = "".join(f"<th>{html.escape(label or '')}</th>" for _, label in norm_cols)
+            key, label = first, second
+        if not isinstance(key, str) or not key:
+            continue
+        if not any(has_data(row.get(key)) for row in rows):
+            continue
+        normalized.append((key, str(label or key)))
+    if normalized:
+        return normalized
+    return [(str(key), str(key)) for key in sample
+            if any(has_data(row.get(str(key))) for row in rows)]
+
+
+def render_table(rows: Sequence[Any], columns: Sequence[tuple[str, str]] | None = None) -> str:
+    cleaned = clean_rows(rows, columns)
+    if not cleaned:
+        return '<p class="muted">暂无数据</p>'
+    norm_cols = _normalize_columns(cleaned, columns)
+    if not norm_cols:
+        return '<p class="muted">暂无数据</p>'
+    head = "".join(f"<th>{esc(label or '')}</th>" for _, label in norm_cols)
     body = []
-    for row in rows:
+    for row in cleaned:
         cells = "".join(f"<td>{_cell_html(row.get(key))}</td>" for key, _ in norm_cols)
         body.append(f"<tr>{cells}</tr>")
     return f'<div class="table-wrap"><table><thead><tr>{head}</tr></thead><tbody>{"".join(body)}</tbody></table></div>'
 
 
 def render_kv_grid(data: Mapping[str, Any]) -> str:
-    items = [(k, v) for k, v in data.items() if v not in (None, "", [], {})]
+    items = [(k, v) for k, v in data.items() if has_data(v)]
     if not items:
-        return '<p class="muted">暂无</p>'
+        return ""
     cells = "".join(
         f'<div class="biz-scope-item"><span>{esc(k)}</span><strong>{esc(v)}</strong></div>'
         for k, v in items
@@ -210,9 +231,9 @@ def render_info_list(data: Mapping[str, Any]) -> str:
     Use this for key/value info inside report body chapters instead of the
     compact card grid, which is reserved for the cover sidebar.
     """
-    items = [(k, v) for k, v in data.items() if v not in (None, "", [], {})]
+    items = [(k, v) for k, v in data.items() if has_data(v)]
     if not items:
-        return '<p class="muted">暂无</p>'
+        return ""
     rows = "".join(
         f'<div class="info-row"><span class="info-label">{esc(CALIBER_LABELS.get(k, k))}</span><span class="info-value">{esc(v)}</span></div>'
         for k, v in items
@@ -220,19 +241,24 @@ def render_info_list(data: Mapping[str, Any]) -> str:
     return f'<div class="info-list">{rows}</div>'
 
 
+def _visible_metrics(metrics: Any) -> List[Dict[str, Any]]:
+    """Only metrics with a real label and a real value (0/False are facts)."""
+    return [m for m in as_list(metrics)
+            if isinstance(m, dict) and has_data(m.get("label")) and has_data(m.get("value"))]
+
+
 def render_metrics(metrics: Sequence[Any]) -> str:
-    if not metrics:
+    visible = _visible_metrics(metrics)
+    if not visible:
         return ""
     cells = []
-    for m in metrics:
-        if not isinstance(m, dict):
-            continue
+    for m in visible:
         val = esc(m.get("value", "-"))
         label = esc(m.get("label", ""))
         delta = m.get("delta") or m.get("trend")
         # delta 放在标签下方独立行，无 delta 时预留占位
         tag_html = '<span class="m-tag"></span>'
-        if delta:
+        if has_data(delta):
             d = str(delta)
             if any(c in d for c in "↑▲增升涨高"):
                 tag_html = f'<span class="m-tag t-up">{esc(d)}</span>'
@@ -240,7 +266,7 @@ def render_metrics(metrics: Sequence[Any]) -> str:
                 tag_html = f'<span class="m-tag t-down">{esc(d)}</span>'
             else:
                 tag_html = f'<span class="m-tag t-neutral">{esc(d)}</span>'
-        hint_html = f'<span class="m-hint">{esc(m["hint"])}</span>' if m.get("hint") else ""
+        hint_html = f'<span class="m-hint">{esc(m["hint"])}</span>' if has_data(m.get("hint")) else ""
         cells.append(f'<div class="biz-metric"><span class="m-name">{label}</span>{tag_html}<span class="m-value">{val}</span>{hint_html}</div>')
     remainder = len(cells) % 4
     if remainder:
@@ -249,28 +275,34 @@ def render_metrics(metrics: Sequence[Any]) -> str:
     return f'<div class="biz-metrics">{"".join(cells)}</div>' if cells else ""
 
 
+def _visible_insights(insights: Any) -> List[Dict[str, Any]]:
+    """Only insight objects that carry at least one real field."""
+    return [item for item in as_list(insights)
+            if isinstance(item, dict)
+            and any(has_data(item.get(field)) for field in ("feature", "evidence", "interpretation"))]
+
+
 def render_insights(insights: Sequence[Any]) -> str:
     cards = []
-    for item in insights or []:
-        if not isinstance(item, dict):
-            continue
+    for item in _visible_insights(insights):
+        heading = f'<h3>{esc(item["feature"])}</h3>' if has_data(item.get("feature")) else ""
+        evidence = f'<p class="structural-evidence">{esc(item["evidence"])}</p>' if has_data(item.get("evidence")) else ""
+        interpretation = f'<p>{esc(item["interpretation"])}</p>' if has_data(item.get("interpretation")) else ""
         cards.append(
             f'''<article class="structural-feature-card">
-  <h3>{esc(item.get("feature") or "")}</h3>
-  <p class="structural-evidence">{esc(item.get("evidence") or "")}</p>
-  <p>{esc(item.get("interpretation") or "")}</p>
+  {heading}
+  {evidence}
+  {interpretation}
 </article>'''
         )
-    return f'<div class="structural-feature-grid">{"".join(cards)}</div>' if cards else '<p class="muted">暂无</p>'
+    return f'<div class="structural-feature-grid">{"".join(cards)}</div>' if cards else ""
 
 
 def render_records(records: Sequence[Any]) -> str:
-    records = [r for r in records if isinstance(r, dict)]
-    if not records:
-        return '<p class="muted">暂无</p>'
-    keys = list(records[0].keys())
-    columns = [(k, k) for k in keys]
-    return render_table(records, columns)
+    cleaned = clean_rows(records)
+    if not cleaned:
+        return ""
+    return render_table(cleaned, [(str(key), str(key)) for key in cleaned[0].keys()])
 
 
 # --------------------------------------------------------------------------- #
@@ -447,11 +479,7 @@ _HANDAAS_CHART_JS = r"""
 """
 
 
-def _num(value: Any) -> float:
-    try:
-        return float(str(value).replace(",", "").replace("%", "").replace("万", ""))
-    except (TypeError, ValueError):
-        return 0.0
+
 
 
 def _chart_fallback_table(rows: Sequence[Mapping[str, Any]], columns: Sequence[tuple[str, str]]) -> str:
@@ -498,60 +526,100 @@ def _sort_rows_by_time(rows: Sequence[Mapping[str, Any]], x_key: str) -> list:
 
 
 def chart_line(title: str, rows: Sequence[Mapping[str, Any]], x_key: str, y_key: str, *, area: bool = False, columns: Sequence[tuple[str, str]] | None = None) -> str:
-    rows = [r for r in rows if isinstance(r, dict)]
-    if not rows:
-        return '<p class="muted">暂无数据</p>'
-    rows = _sort_rows_by_time(rows, x_key)
-    cols = columns or [(x_key, x_key), (y_key, y_key)]
-    data = [{"name": text(r.get(x_key)), "value": _num(r.get(y_key))} for r in rows]
+    cleaned = clean_rows(rows)
+    plot_rows = [r for r in cleaned
+                 if has_data(r.get(x_key)) and numeric_value(r.get(y_key)) is not None]
+    if not plot_rows:
+        return ""
+    plot_rows = _sort_rows_by_time(plot_rows, x_key)
+    cleaned = _sort_rows_by_time(cleaned, x_key)
+    cols = _normalize_columns(cleaned, columns or [(x_key, x_key), (y_key, y_key)])
+    data = [{"name": text(r.get(x_key)), "value": numeric_value(r.get(y_key))} for r in plot_rows]
     spec = {"type": "line", "area": area, "x": [d["name"] for d in data], "series": [{"name": title, "data": [d["value"] for d in data]}]}
     head = f'<h4 class="chart-title">{esc(title)}</h4>' if title else ""
-    return f'<div class="chart-box">{head}<div class="chart-canvas" data-chart="line" data-spec="{esc(json_dumps(spec))}"></div>{_chart_fallback_table(rows, cols)}</div>'
+    return f'<div class="chart-box">{head}<div class="chart-canvas" data-chart="line" data-spec="{esc(json_dumps(spec))}"></div>{_chart_fallback_table(cleaned, cols)}</div>'
 
 
 def chart_multi_line(title: str, rows: Sequence[Mapping[str, Any]], x_key: str, series_keys: Sequence[str], *, area: bool = False, columns: Sequence[tuple[str, str]] | None = None) -> str:
-    rows = [r for r in rows if isinstance(r, dict)]
-    if not rows:
-        return '<p class="muted">暂无数据</p>'
-    rows = _sort_rows_by_time(rows, x_key)
-    cols = columns or [(x_key, x_key)] + [(k, k) for k in series_keys]
-    x = [text(r.get(x_key)) for r in rows]
-    series = [{"name": k, "data": [_num(r.get(k)) for r in rows]} for k in series_keys]
+    cleaned = clean_rows(rows)
+    series_keys = [k for k in series_keys if isinstance(k, str) and k]
+    plot_rows = [r for r in cleaned
+                 if has_data(r.get(x_key))
+                 and any(numeric_value(r.get(k)) is not None for k in series_keys)]
+    if not series_keys or not plot_rows:
+        return ""
+    plot_rows = _sort_rows_by_time(plot_rows, x_key)
+    cleaned = _sort_rows_by_time(cleaned, x_key)
+    series = []
+    for key in series_keys:
+        values = [numeric_value(r.get(key)) for r in plot_rows]
+        if any(value is not None for value in values):
+            series.append({"name": key, "data": values})
+    if not series:
+        return ""
+    x = [text(r.get(x_key)) for r in plot_rows]
     spec = {"type": "line", "area": area, "stack": area, "x": x, "series": series}
+    cols = _normalize_columns(cleaned, columns or [(x_key, x_key)] + [(k, k) for k in series_keys])
     head = f'<h4 class="chart-title">{esc(title)}</h4>' if title else ""
-    return f'<div class="chart-box">{head}<div class="chart-canvas" data-chart="line" data-spec="{esc(json_dumps(spec))}"></div>{_chart_fallback_table(rows, cols)}</div>'
+    return f'<div class="chart-box">{head}<div class="chart-canvas" data-chart="line" data-spec="{esc(json_dumps(spec))}"></div>{_chart_fallback_table(cleaned, cols)}</div>'
 
 
 def chart_bar(title: str, rows: Sequence[Mapping[str, Any]], name_key: str, value_key: str, *, orient: str = "v", columns: Sequence[tuple[str, str]] | None = None) -> str:
-    rows = [r for r in rows if isinstance(r, dict)]
-    if not rows:
-        return '<p class="muted">暂无数据</p>'
-    cols = columns or [(name_key, name_key), (value_key, value_key)]
-    data = [{"name": text(r.get(name_key)), "value": _num(r.get(value_key))} for r in rows]
+    cleaned = clean_rows(rows)
+    plot_rows = [r for r in cleaned
+                 if has_data(r.get(name_key)) and numeric_value(r.get(value_key)) is not None]
+    if not plot_rows:
+        return ""
+    cols = _normalize_columns(cleaned, columns or [(name_key, name_key), (value_key, value_key)])
+    data = [{"name": text(r.get(name_key)), "value": numeric_value(r.get(value_key))} for r in plot_rows]
     spec = {"type": "bar", "orient": orient, "names": [d["name"] for d in data], "values": [d["value"] for d in data]}
     head = f'<h4 class="chart-title">{esc(title)}</h4>' if title else ""
-    return f'<div class="chart-box">{head}<div class="chart-canvas" data-chart="bar" data-spec="{esc(json_dumps(spec))}"></div>{_chart_fallback_table(rows, cols)}</div>'
+    return f'<div class="chart-box">{head}<div class="chart-canvas" data-chart="bar" data-spec="{esc(json_dumps(spec))}"></div>{_chart_fallback_table(cleaned, cols)}</div>'
 
 
 def chart_pie(title: str, rows: Sequence[Mapping[str, Any]], name_key: str, value_key: str, *, donut: bool = False, columns: Sequence[tuple[str, str]] | None = None) -> str:
-    rows = [r for r in rows if isinstance(r, dict)]
-    if not rows:
-        return '<p class="muted">暂无数据</p>'
-    cols = columns or [(name_key, name_key), (value_key, value_key)]
-    data = [{"name": text(r.get(name_key)), "value": _num(r.get(value_key))} for r in rows]
+    cleaned = clean_rows(rows)
+    plot_rows = [r for r in cleaned
+                 if has_data(r.get(name_key)) and numeric_value(r.get(value_key)) is not None]
+    if not plot_rows:
+        return ""
+    cols = _normalize_columns(cleaned, columns or [(name_key, name_key), (value_key, value_key)])
+    data = [{"name": text(r.get(name_key)), "value": numeric_value(r.get(value_key))} for r in plot_rows]
     spec = {"type": "pie", "donut": donut, "data": data}
     head = f'<h4 class="chart-title">{esc(title)}</h4>' if title else ""
-    return f'<div class="chart-box">{head}<div class="chart-canvas" data-chart="pie" data-spec="{esc(json_dumps(spec))}"></div>{_chart_fallback_table(rows, cols)}</div>'
+    return f'<div class="chart-box">{head}<div class="chart-canvas" data-chart="pie" data-spec="{esc(json_dumps(spec))}"></div>{_chart_fallback_table(cleaned, cols)}</div>'
 
 
 def chart_gauge(title: str, value: float, *, level: str = "", max_val: float = 100.0) -> str:
-    spec = {"type": "gauge", "value": _num(value), "max": max_val, "level": level}
+    val = numeric_value(value)
+    if val is None:
+        return ""
+    max_value = max_val if isinstance(max_val, (int, float)) and not isinstance(max_val, bool) else numeric_value(max_val)
+    if max_value is None:
+        max_value = 100
+    spec = {"type": "gauge", "value": val, "max": max_value,
+            "level": text(level) if has_data(level) else ""}
     return f'<div class="chart-box chart-box-gauge"><div class="chart-canvas" data-chart="gauge" data-spec="{esc(json_dumps(spec))}"></div></div>'
 
 
 def chart_radar(title: str, indicators: Sequence[Mapping[str, Any]], series: Sequence[Mapping[str, Any]]) -> str:
     """indicators: [{name, max}], series: [{name, value:[...]}]"""
-    spec = {"type": "radar", "indicators": [{"name": i.get("name", ""), "max": _num(i.get("max", 100))} for i in indicators], "series": [{"name": s.get("name", ""), "value": [_num(v) for v in (s.get("value") or [])]} for s in series]}
+    clean_indicators = []
+    for item in indicators or []:
+        if not isinstance(item, dict) or not has_data(item.get("name")):
+            continue
+        max_value = numeric_value(item.get("max"))
+        clean_indicators.append({"name": text(item["name"]), "max": max_value if max_value is not None else 100.0})
+    clean_series = []
+    for item in series or []:
+        if not isinstance(item, dict):
+            continue
+        values = [numeric_value(value) for value in as_list(item.get("value"))]
+        if any(value is not None for value in values):
+            clean_series.append({"name": text(item.get("name")), "value": values})
+    if not clean_indicators or not clean_series:
+        return ""
+    spec = {"type": "radar", "indicators": clean_indicators, "series": clean_series}
     return f'<div class="chart-box"><div class="chart-canvas" data-chart="radar" data-spec="{esc(json_dumps(spec))}"></div></div>'
 
 
@@ -559,24 +627,34 @@ def chart_radar(title: str, indicators: Sequence[Mapping[str, Any]], series: Seq
 # Core analysis rendering — domain-driven via section specs
 # --------------------------------------------------------------------------- #
 
+def _section_note_text(value: Any, rows: Sequence[Any]) -> str:
+    if not has_data(value):
+        return ""
+    note = str(value)
+    if rows:
+        for marker, unit in (("展示前 N 条", "条"), ("展示前若干条", "条"),
+                             ("展示前 N 个", "个"), ("展示前 N 家", "家")):
+            note = note.replace(marker, f"展示前 {len(rows)} {unit}")
+    return note
+
+
 def _render_one_section(core: Mapping[str, Any], spec: Mapping[str, Any]) -> str:
     """Render a single section spec into HTML (without pairing). Returns '' if empty."""
-    key = spec.get("key") or ""
+    if not section_has_data(core, spec):
+        return ""
+    key = str(spec.get("key") or "")
     body = core.get(key)
     kind = spec.get("kind")
-    title_html = f'<h3 class="biz-subsection-title">{esc(spec.get("title", ""))}</h3>'
-    # Replace " N " in note with actual row count when body is a list
-    note_text = spec.get("note", "")
-    if note_text:
-        if isinstance(body, list) and len(body) > 0:
-            note_text = note_text.replace("展示前 N 条", f"展示前 {len(body)} 条")
-            note_text = note_text.replace("展示前若干条", f"展示前 {len(body)} 条")
-            note_text = note_text.replace("展示前 N 个", f"展示前 {len(body)} 个")
-            note_text = note_text.replace("展示前 N 家", f"展示前 {len(body)} 家")
-    note = f'<p class="biz-section-note">{esc(note_text)}</p>' if note_text else ""
+    title = spec.get("title", "")
+    title_html = f'<h3 class="biz-subsection-title">{esc(title)}</h3>' if has_data(title) else ""
+
+    rows = clean_rows(as_list(body), spec.get("columns")) if kind in ("line", "bar", "pie", "donut", "multi_line", "table", None) else []
+    note_text = _section_note_text(spec.get("note"), rows)
+    note = f'<p class="biz-section-note">{esc(note_text)}</p>' if has_data(note_text) else ""
 
     if kind == "text":
-        if not compact(body):
+        body_text = compact(body)
+        if not has_data(body_text):
             return ""
         return f'{title_html}{note}<p class="biz-summary">{esc(compact(body, limit=1500))}</p>'
     elif kind == "tags":
@@ -586,50 +664,65 @@ def _render_one_section(core: Mapping[str, Any], spec: Mapping[str, Any]) -> str
         labels = "".join(f"<li>{esc(item)}</li>" for item in items)
         return f'{title_html}{note}<ul class="tag-row">{labels}</ul>'
     elif kind == "kv":
-        if not isinstance(body, dict) or not body:
+        info_html = render_info_list(body) if isinstance(body, dict) else ""
+        if not info_html:
             return ""
-        return f'{title_html}{note}{render_info_list(body)}'
+        return f'{title_html}{note}{info_html}'
     elif kind in ("line", "bar", "pie", "donut", "multi_line"):
-        rows = [r for r in as_list(body) if isinstance(r, dict)]
         if not rows:
             return ""
         ch = spec.get("chart") or {}
-        cols = spec.get("columns") or [(k, k) for k in rows[0].keys()]
+        norm_cols = _normalize_columns(rows, spec.get("columns"))
+        x_key = ch.get("x") or (norm_cols[0][0] if norm_cols else "")
+        y_key = ch.get("y") or (norm_cols[1][0] if len(norm_cols) > 1 else "")
+        name_key = ch.get("name") or (norm_cols[0][0] if norm_cols else "")
+        value_key = ch.get("value") or (norm_cols[1][0] if len(norm_cols) > 1 else "")
         chart_html = ""
         if kind == "line":
-            chart_html = chart_line(spec.get("title", ""), rows, ch.get("x", cols[0][1] if cols else ""), ch.get("y", cols[1][1] if len(cols) > 1 else ""), area=ch.get("area", False), columns=cols)
+            chart_html = chart_line(spec.get("title", ""), rows, x_key, y_key, area=ch.get("area", False), columns=norm_cols)
         elif kind == "multi_line":
-            chart_html = chart_multi_line(spec.get("title", ""), rows, ch.get("x", cols[0][1] if cols else ""), ch.get("series", []), area=ch.get("area", False), columns=cols)
+            chart_html = chart_multi_line(spec.get("title", ""), rows, x_key, ch.get("series", []), area=ch.get("area", False), columns=norm_cols)
         elif kind == "bar":
-            chart_html = chart_bar(spec.get("title", ""), rows, ch.get("name", cols[0][1] if cols else ""), ch.get("value", cols[1][1] if len(cols) > 1 else ""), orient=ch.get("orient", "v"), columns=cols)
-        elif kind in ("pie", "donut"):
-            chart_html = chart_pie(spec.get("title", ""), rows, ch.get("name", cols[0][1] if cols else ""), ch.get("value", cols[1][1] if len(cols) > 1 else ""), donut=(kind == "donut" or bool(ch.get("donut"))), columns=cols)
+            chart_html = chart_bar(spec.get("title", ""), rows, name_key, value_key, orient=ch.get("orient", "v"), columns=norm_cols)
+        else:
+            chart_html = chart_pie(spec.get("title", ""), rows, name_key, value_key, donut=(kind == "donut" or bool(ch.get("donut"))), columns=norm_cols)
+        if not chart_html:
+            table_html = render_table(rows, spec.get("columns") or norm_cols)
+            return f'{title_html}{note}{table_html}' if table_html else ""
         return f'{note}{chart_html}'
     elif kind == "gauge":
-        if not isinstance(body, dict) or not body:
+        if not isinstance(body, dict):
             return ""
         ch = spec.get("chart") or {}
-        val = _num(body.get(ch.get("value_key", "风险评分")))
-        lvl = text(body.get(ch.get("level_key", "风险等级")))
-        # When paired (pair_with set), skip the info-list so both columns are chart-only and equal height
-        info_html = "" if spec.get("pair_with") else render_info_list(body)
-        return f'{title_html}{note}{chart_gauge(spec.get("title", ""), val, level=lvl, max_val=ch.get("max", 100))}{info_html}'
+        value_key = ch.get("value_key", "风险评分")
+        level_key = ch.get("level_key", "风险等级")
+        val = numeric_value(body.get(value_key))
+        level = text(body.get(level_key)) if has_data(body.get(level_key)) else ""
+        info_items = {k: v for k, v in body.items() if has_data(v)}
+        info_html = render_info_list(info_items) if info_items else ""
+        if val is None:
+            # A missing score must not become a 0 gauge; keep the real KV only.
+            return f'{title_html}{note}{info_html}' if info_html else ""
+        max_value = numeric_value(ch.get("max"))
+        if max_value is None:
+            max_value = 100
+        after = "" if spec.get("pair_with") else info_html
+        return f'{title_html}{note}{chart_gauge(spec.get("title", ""), val, level=level, max_val=max_value)}{after}'
     elif kind == "radar":
         ch = spec.get("chart") or {}
-        inds = ch.get("indicators", [])
-        sers = ch.get("series", [])
-        if not inds and isinstance(body, dict):
-            inds = body.get("indicators", [])
-            sers = body.get("series", [])
-        if inds and sers:
-            return f'{title_html}{note}{chart_radar(spec.get("title", ""), inds, sers)}'
-        return ""
+        indicators = ch.get("indicators") or (body.get("indicators") if isinstance(body, dict) else []) or []
+        series = ch.get("series") or (body.get("series") if isinstance(body, dict) else []) or []
+        radar_html = chart_radar(spec.get("title", ""), indicators, series)
+        if not radar_html:
+            return ""
+        return f'{title_html}{note}{radar_html}'
     elif kind == "table" or kind is None:
-        rows = [r for r in as_list(body) if isinstance(r, dict)]
         if not rows:
             return ""
-        columns = spec.get("columns") or [(k, k) for k in rows[0].keys()]
-        return f'{title_html}{note}{render_table(rows, columns)}'
+        table_html = render_table(rows, spec.get("columns") or _normalize_columns(rows, None))
+        if not table_html:
+            return ""
+        return f'{title_html}{note}{table_html}'
     return ""
 
 
@@ -638,9 +731,10 @@ def render_core_analysis_html(core: Mapping[str, Any], sections: Sequence[Mappin
     sections (e.g. gauge + radar) side-by-side in a two-column layout, avoiding
     large whitespace from single-chart sections.
     """
+    specs = [spec for spec in sections or [] if isinstance(spec, dict)]
     blocks: list[str] = []
     skip_keys: set[str] = set()
-    for i, spec in enumerate(sections):
+    for i, spec in enumerate(specs):
         key = spec.get("key")
         if key in skip_keys:
             continue
@@ -649,9 +743,9 @@ def render_core_analysis_html(core: Mapping[str, Any], sections: Sequence[Mappin
         if pair_target:
             # Find the pairing section (usually the next one)
             paired_spec = None
-            for s in sections[i + 1:]:
-                if s.get("key") == pair_target:
-                    paired_spec = s
+            for candidate in specs[i + 1:]:
+                if candidate.get("key") == pair_target:
+                    paired_spec = candidate
                     skip_keys.add(pair_target)
                     break
             if paired_spec is not None:
@@ -667,7 +761,7 @@ def render_core_analysis_html(core: Mapping[str, Any], sections: Sequence[Mappin
         html = _render_one_section(core, spec)
         if html:
             blocks.append(html)
-    return "\n".join(blocks) if blocks else '<p class="muted">暂无核心分析数据</p>'
+    return "\n".join(blocks)
 
 
 # --------------------------------------------------------------------------- #
@@ -743,26 +837,29 @@ _GLOSSARY = {
 
 
 def _detect_glossary_terms(report: Mapping[str, Any]) -> list:
-    """Scan report text for professional terms. Returns [(term, definition), ...]."""
-    parts = [str(report.get("abstract", "")), str(report.get("summary", ""))]
+    """Scan visible report text for professional terms. Returns [(term, definition), ...]."""
+    parts: list[str] = []
+    if has_data(report.get("abstract")):
+        parts.append(str(report["abstract"]))
+    if has_data(report.get("summary")):
+        parts.append(str(report["summary"]))
     for item in as_list(report.get("executive_summary")):
-        parts.append(str(item))
-    for ins in as_list(report.get("insights")):
-        if isinstance(ins, dict):
-            parts.append(str(ins.get("evidence", "")))
-            parts.append(str(ins.get("interpretation", "")))
-            parts.append(str(ins.get("feature", "")))
-    for m in as_list(report.get("metrics")):
-        if isinstance(m, dict):
-            parts.append(str(m.get("label", "")))
-            parts.append(str(m.get("hint", "")))
-            parts.append(str(m.get("delta", "")))
+        if has_data(item):
+            parts.append(str(item))
+    for insight in _visible_insights(report.get("insights")):
+        for field in ("evidence", "interpretation", "feature"):
+            if has_data(insight.get(field)):
+                parts.append(str(insight[field]))
+    for metric in _visible_metrics(report.get("metrics")):
+        for field in ("label", "hint", "delta"):
+            if has_data(metric.get(field)):
+                parts.append(str(metric[field]))
     core = report.get("core_analysis", {})
-    if isinstance(core, dict):
-        for sec in as_list(core.get("sections")):
-            if isinstance(sec, dict):
-                parts.append(str(sec.get("note", "")))
-                parts.append(str(sec.get("summary", "")))
+    if isinstance(core, Mapping):
+        for section in visible_sections(core, core.get("sections")):
+            for field in ("note", "summary"):
+                if has_data(section.get(field)):
+                    parts.append(str(section[field]))
     combined = " ".join(parts)
     found = []
     for term, definition in _GLOSSARY.items():
@@ -778,74 +875,138 @@ def _detect_glossary_terms(report: Mapping[str, Any]) -> list:
 def render_html(data: Dict[str, Any], *, sections: Sequence[Mapping[str, Any]] | None = None) -> str:
     title = infer_title(data)
     banner = infer_banner(data)
-    generated_at = compact(data.get("data_source", {}).get("generated_at") or dt.datetime.now().astimezone().isoformat(timespec="seconds"))
+    ds = data.get("data_source") if isinstance(data.get("data_source"), Mapping) else {}
+    semantic_review = ds.get("semantic_review") if isinstance(ds.get("semantic_review"), Mapping) else {}
+    review_pending = semantic_review.get("status") == "pending"
+    generated_at = compact(ds.get("generated_at") or dt.datetime.now().astimezone().isoformat(timespec="seconds"))
     try:
-        _gd = dt.datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
+        _gd = dt.datetime.fromisoformat(str(generated_at).replace("Z", "+00:00"))
         generated_at_cn = f"{_gd.year}年{_gd.month:02d}月{_gd.day:02d}日"
     except Exception:
-        generated_at_cn = generated_at[:10] if len(generated_at) >= 10 else generated_at
-    subject = data.get("subject") or {}
+        generated_at_cn = str(generated_at)[:10] if len(str(generated_at)) >= 10 else str(generated_at)
+    subject = data.get("subject") if isinstance(data.get("subject"), Mapping) else {}
     abstract = compact(data.get("abstract") or data.get("summary") or "")
-    exec_summary = data.get("executive_summary") or []
-    metrics = data.get("metrics") or []
-    caliber = data.get("caliber") or {}
-    core = data.get("core_analysis") or {}
-    records = data.get("representative_records") or []
-    insights = data.get("insights") or []
-    sections = sections or get_sections(data)
+    exec_summary = [line for line in as_list(data.get("executive_summary")) if has_data(line)]
+    metrics = as_list(data.get("metrics"))
+    caliber = data.get("caliber") if isinstance(data.get("caliber"), Mapping) else {}
+    core = data.get("core_analysis") if isinstance(data.get("core_analysis"), Mapping) else {}
+    records = clean_rows(as_list(data.get("representative_records")))
+    insights = _visible_insights(data.get("insights"))
+    if sections is None:
+        sections = get_sections(data)
+    else:
+        sections = list(sections)
+    core_sections = visible_sections(core, sections)
 
-    toc = ["报告摘要", "查询对象与口径", "数据总览", "核心分析", "代表性记录", "特征与洞察"]
-    toc_html = "".join(f"<li><span>{esc(item)}</span></li>" for item in toc)
+    metrics_html = render_metrics(metrics)
+    core_html = render_core_analysis_html(core, core_sections)
+    records_html = render_records(records)
+    insights_html = render_insights(insights)
+    summary_text = abstract
+    has_summary = has_data(summary_text)
+    has_metrics = bool(metrics_html)
+    has_core = bool(core_html)
+    has_records = bool(records_html)
+    has_insights = bool(insights_html)
 
-    scope_items = []
-    for key in ("match_target", "match_type", "data_scope", "limit"):
-        if caliber.get(key):
-            scope_items.append((CALIBER_LABELS.get(key, key), caliber[key]))
+    match_target = (caliber.get("match_target") or subject.get("enterprise")
+                    or subject.get("matchKeyword") or subject.get("match_raw"))
+    caliber_items: Dict[str, Any] = {}
+    for label, value in (
+        ("匹配对象", match_target),
+        ("匹配方式", caliber.get("match_type")),
+        ("数据范围", caliber.get("data_scope")),
+        ("局限说明", caliber.get("limit")),
+    ):
+        if has_data(value):
+            caliber_items[label] = value
+    has_caliber = bool(caliber_items)
+
+    toc_entries: List[str] = []
+    if has_summary:
+        toc_entries.append("报告摘要")
+    if has_caliber:
+        toc_entries.append("查询对象与口径")
+    if has_metrics:
+        toc_entries.append("数据总览")
+    if has_core:
+        toc_entries.append("核心分析")
+    if has_records:
+        toc_entries.append("代表性记录")
+    if has_insights:
+        toc_entries.append("特征与洞察")
+    toc_html = "".join(f"<li><span>{esc(item)}</span></li>" for item in toc_entries)
+    toc_block = f'<h3 class="toc-title">目录</h3><ol class="toc-list">{toc_html}</ol>' if toc_entries else ""
+
+    scope_items = list(caliber_items.items())
     scope_html = "".join(
         f'<div class="biz-scope-item"><span>{esc(label)}</span><strong>{esc(value)}</strong></div>'
         for label, value in scope_items
-    ) or '<div class="biz-scope-item"><span>说明</span><strong>见正文口径章节</strong></div>'
+    )
+    scope_block = f'<h3 class="scope-title">报告口径</h3><div class="biz-scope">{scope_html}</div>' if scope_items else ""
 
-    exec_html = "".join(f"<li>{esc(line)}</li>" for line in exec_summary) if exec_summary else ""
-    # Build cover findings from insights (top 4) to fill the cover page
-    cover_insights = insights[:4] if insights else []
+    exec_html = "".join(f"<li>{esc(line)}</li>" for line in exec_summary)
+    exec_block = f'<ul class="exec-list">{exec_html}</ul>' if exec_html else ""
+    lead_html = f'<p class="report-lead">{esc(compact(summary_text, limit=400))}</p>' if has_summary else ""
+
+    cover_insights = insights[:4]
     findings_html = ""
     if cover_insights:
         cards = []
         for ins in cover_insights:
-            feature = esc(ins.get("feature", ""))
-            evidence = esc(ins.get("evidence", ""))
-            interpretation = esc(compact(ins.get("interpretation", ""), limit=80))
-            text = evidence if evidence else interpretation
-            if feature and text:
-                cards.append(f'<div class="finding-card"><p class="f-label">{feature}</p><p class="f-text">{text}</p></div>')
+            feature = ins.get("feature") if has_data(ins.get("feature")) else ""
+            evidence = ins.get("evidence") if has_data(ins.get("evidence")) else ""
+            interpretation = compact(ins.get("interpretation"), limit=80) if has_data(ins.get("interpretation")) else ""
+            body_text = evidence or interpretation
+            if not body_text:
+                continue
+            label_html = f'<p class="f-label">{esc(feature)}</p>' if feature else ""
+            cards.append(f'<div class="finding-card">{label_html}<p class="f-text">{esc(body_text)}</p></div>')
         if cards:
             findings_html = f'<div class="cover-findings"><h3 class="cover-findings-title">核心发现</h3><div class="cover-findings-grid">{"".join(cards)}</div></div>'
-    # --- Cover page enrichment: populated dimensions and source scope ---
 
-    # 1) Analysis dimensions from section titles
-    _dim_titles = [s.get("title", "") for s in sections
-                   if s.get("title") and core.get(s.get("key")) not in (None, "", [], {})
-                   and (s.get("kind") != "tags" or tag_items(core.get(s.get("key"))))]
-    _dim_tags = "".join(f'<span class="dim-tag">{esc(t)}</span>' for t in _dim_titles) if _dim_titles else ""
+    dim_titles = list(dict.fromkeys(
+        str(spec.get("title")) for spec in core_sections if has_data(spec.get("title"))
+    ))
+    _dim_tags = "".join(f'<span class="dim-tag">{esc(t)}</span>' for t in dim_titles)
     dimensions_html = ""
-    if _dim_tags:
+    if _dim_tags and has_core:
         dimensions_html = f'<div class="cover-dimensions"><span class="dim-label">分析维度</span><div class="dim-tags">{_dim_tags}</div></div>'
 
-    # 2) Data scope info bar from caliber
-    _scope_parts = []
-    if caliber.get("products"):
-        _scope_parts.append(("数据产品", "、".join(caliber["products"])))
-    if caliber.get("data_scope"):
-        _scope_parts.append(("覆盖范围", str(caliber["data_scope"])[:80]))
+    scope_parts = []
+    products = tag_items(caliber.get("products")) if has_data(caliber.get("products")) else []
+    if products:
+        scope_parts.append(("数据产品", "、".join(products)))
+    if has_data(caliber.get("data_scope")):
+        scope_parts.append(("覆盖范围", str(caliber["data_scope"])[:80]))
     scope_bar_html = ""
-    if _scope_parts:
-        _scope_items = "".join(f'<span class="scope-item"><em>{esc(label)}</em>{esc(v)}</span>' for label, v in _scope_parts)
+    if scope_parts:
+        _scope_items = "".join(f'<span class="scope-item"><em>{esc(label)}</em>{esc(value)}</span>' for label, value in scope_parts)
         scope_bar_html = f'<div class="cover-scope-bar">{_scope_items}</div>'
 
-    core_html = render_core_analysis_html(core, sections)
+    intro_html = ""
+    if has_summary or has_metrics or has_core or has_records or has_insights or has_caliber:
+        intro_html = '<div class="abstract-box">报告涵盖查询对象、数据总览、核心分析、代表性记录与结构洞察，所有数据均标注口径与来源。</div>'
 
-    # Build glossary section from detected professional terms
+    def _page(heading: str, note: str, tag: str, body: str) -> str:
+        return (
+            f'<section class="report-page biz-section">'
+            f'<div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">{esc(banner)}</div></div>'
+            f'<div class="biz-section-head"><div><h2>{esc(heading)}</h2><p class="biz-section-note">{esc(note)}</p></div>'
+            f'<span class="biz-tag">{esc(tag)}</span></div>{body}</section>'
+        )
+
+    summary_section = ""
+    if has_summary:
+        summary_section = _page("报告摘要", "概述分析对象、数据覆盖范围与核心发现。", "Summary", f'<p class="biz-summary">{esc(summary_text)}</p>')
+    caliber_section = ""
+    if has_caliber:
+        caliber_section = _page("查询对象与口径", "说明匹配对象、匹配方式与数据范围。", "Caliber", render_info_list(caliber_items))
+    metrics_section = _page("数据总览", "关键指标一览。", "Metrics", metrics_html) if has_metrics else ""
+    core_section = _page("核心分析", "按维度展开目标核心数据与结构化明细。", "Analysis", core_html) if has_core else ""
+    records_section = _page("代表性记录", "关键明细记录 Top N。", "Records", records_html) if has_records else ""
+    insights_section = _page("特征与洞察", "基于数据的结构化解读。", "Insights", insights_html) if has_insights else ""
+
     _glossary_terms = _detect_glossary_terms(data)
     glossary_html = ""
     if _glossary_terms:
@@ -863,6 +1024,16 @@ def render_html(data: Dict[str, Any], *, sections: Sequence[Mapping[str, Any]] |
             f'<div class="glossary-list">{_glossary_rows}</div>'
             f'</section>'
         )
+
+    review_banner = ""
+    if review_pending:
+        review_banner = (
+            '<div class="draft-review-banner" style="margin:0 0 18px;padding:12px 16px;'
+            'border:1px solid #d97706;border-left:6px solid #d97706;background:#fff8eb;'
+            'color:#92400e;font-size:14px;font-weight:800;line-height:1.7;">'
+            '数据草稿（待AI语义审校）：本报告尚未完成当前 AI 智能体的语义审校，请完成审校后再对外交付。</div>'
+        )
+
     return embed_static_charts(f"""<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -1041,18 +1212,17 @@ def render_html(data: Dict[str, Any], *, sections: Sequence[Mapping[str, Any]] |
       <aside class="cover-side">
         <h2 class="cover-side-title">{esc(banner)}</h2>
         <p class="cover-date">{esc(generated_at_cn)}</p>
-        <h3 class="toc-title">目录</h3>
-        <ol class="toc-list">{toc_html}</ol>
-        <h3 class="scope-title">报告口径</h3>
-        <div class="biz-scope">{scope_html}</div>
+        {toc_block}
+        {scope_block}
       </aside>
       <section class="cover-main">
+        {review_banner}
         <p class="report-kicker">PUBLIC OPINION RESEARCH</p>
         <h1>{esc(title)}</h1>
-        <p class="report-lead">{esc(compact(abstract, limit=400) or "本报告基于商标公开数据，对目标商标的核心维度进行结构化呈现。")}</p>
-        <div class="abstract-box">报告涵盖查询对象、数据总览、核心分析、代表性记录与结构洞察，所有数据均标注口径与来源。</div>
-        {render_metrics(metrics)}
-        {'<ul class="exec-list">' + exec_html + '</ul>' if exec_html else ''}
+        {lead_html}
+        {intro_html}
+        {metrics_html}
+        {exec_block}
         {findings_html}
         {dimensions_html}
         {scope_bar_html}
@@ -1060,12 +1230,13 @@ def render_html(data: Dict[str, Any], *, sections: Sequence[Mapping[str, Any]] |
     </div>
   </article>
   <main class="research-doc">
-    <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">{esc(banner)}</div></div><div class="biz-section-head"><div><h2>报告摘要</h2><p class="biz-section-note">概述分析对象、数据覆盖范围与核心发现。</p></div><span class="biz-tag">Summary</span></div><p class="biz-summary">{esc(abstract or "暂无摘要。")}</p></section>
-    <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">{esc(banner)}</div></div><div class="biz-section-head"><div><h2>查询对象与口径</h2><p class="biz-section-note">说明匹配对象、匹配方式与数据范围。</p></div><span class="biz-tag">Caliber</span></div>{render_info_list({'匹配对象': caliber.get('match_target') or subject.get('enterprise') or '-', '匹配方式': caliber.get('match_type') or '-', '数据范围': caliber.get('data_scope') or '-', '局限说明': caliber.get('limit') or '-'})}</section>
-    <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">{esc(banner)}</div></div><div class="biz-section-head"><div><h2>数据总览</h2><p class="biz-section-note">关键指标一览。</p></div><span class="biz-tag">Metrics</span></div>{render_metrics(metrics) or '<p class="muted">暂无指标</p>'}</section>
-    <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">{esc(banner)}</div></div><div class="biz-section-head"><div><h2>核心分析</h2><p class="biz-section-note">按维度展开目标核心数据与结构化明细。</p></div><span class="biz-tag">Analysis</span></div>{core_html}</section>
-    <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">{esc(banner)}</div></div><div class="biz-section-head"><div><h2>代表性记录</h2><p class="biz-section-note">关键明细记录 Top N。</p></div><span class="biz-tag">Records</span></div>{render_records(records)}</section>
-    <section class="report-page biz-section"><div class="report-topbar"><div class="report-stripe"></div><div class="report-banner">{esc(banner)}</div></div><div class="biz-section-head"><div><h2>特征与洞察</h2><p class="biz-section-note">基于数据的结构化解读。</p></div><span class="biz-tag">Insights</span></div>{render_insights(insights)}</section>
+    {review_banner}
+    {summary_section}
+    {caliber_section}
+    {metrics_section}
+    {core_section}
+    {records_section}
+    {insights_section}
     {glossary_html}
   </main>
 </body>
@@ -1077,109 +1248,148 @@ def render_html(data: Dict[str, Any], *, sections: Sequence[Mapping[str, Any]] |
 # Markdown document
 # --------------------------------------------------------------------------- #
 
+def _md_cell(value: Any) -> str:
+    value = text(value) or "-"
+    return (value.replace("\\", "\\\\").replace("|", "\\|")
+            .replace("\r\n", " ").replace("\r", " ").replace("\n", " "))
+
+
 def md_table(rows: Sequence[Any], columns: Sequence[tuple[str, str]] | None = None) -> str:
-    rows = [r for r in rows if isinstance(r, dict)] if rows else []
-    if not rows:
+    cleaned = clean_rows(rows, columns)
+    if not cleaned:
         return "_暂无数据_\n"
-    if not columns:
-        columns = [(str(k), str(k)) for k in rows[0].keys()]
-    head = "| " + " | ".join(label for _, label in columns) + " |"
-    sep = "| " + " | ".join("---" for _ in columns) + " |"
+    norm_cols = _normalize_columns(cleaned, columns)
+    if not norm_cols:
+        return "_暂无数据_\n"
+    head = "| " + " | ".join(_md_cell(label) for _, label in norm_cols) + " |"
+    sep = "| " + " | ".join("---" for _ in norm_cols) + " |"
     body = []
-    for row in rows:
-        body.append("| " + " | ".join(text(row.get(key, "")) or "-" for key, _ in columns) + " |")
+    for row in cleaned:
+        body.append("| " + " | ".join(_md_cell(row.get(key, "")) for key, _ in norm_cols) + " |")
     return "\n".join([head, sep, *body]) + "\n"
 
 
 def render_markdown(data: Dict[str, Any]) -> str:
     title = infer_title(data)
-    subject = data.get("subject") or {}
-    metrics = data.get("metrics") or []
-    caliber = data.get("caliber") or {}
-    core = data.get("core_analysis") or {}
-    records = data.get("representative_records") or []
-    insights = data.get("insights") or []
-    ds = data.get("data_source") or {}
-    sections = get_sections(data)
+    ds = data.get("data_source") if isinstance(data.get("data_source"), Mapping) else {}
+    semantic_review = ds.get("semantic_review") if isinstance(ds.get("semantic_review"), Mapping) else {}
+    subject = data.get("subject") if isinstance(data.get("subject"), Mapping) else {}
+    caliber = data.get("caliber") if isinstance(data.get("caliber"), Mapping) else {}
+    core = data.get("core_analysis") if isinstance(data.get("core_analysis"), Mapping) else {}
+    sections = visible_sections(core, get_sections(data))
+    metrics = _visible_metrics(as_list(data.get("metrics")))
+    records = clean_rows(as_list(data.get("representative_records")))
+    insights = _visible_insights(data.get("insights"))
+    summary = compact(data.get("abstract") or data.get("summary") or "")
 
     lines: List[str] = []
     lines.append(f"# {title}\n")
-    lines.append(f"> {compact(data.get('abstract') or data.get('summary') or '')}\n")
-    if ds.get("generated_at"):
+    if semantic_review.get("status") == "pending":
+        lines.append("> **数据草稿（待AI语义审校）**：本报告尚未完成当前 AI 智能体的语义审校，请完成审校后再对外交付。\n")
+    if has_data(summary):
+        lines.append(f"> {summary}\n")
+    if has_data(ds.get("generated_at")):
         lines.append(f"_生成时间：{ds.get('generated_at')}_\n")
 
-    lines.append("## 一、查询对象与口径\n")
-    lines.append(f"- 匹配对象：{caliber.get('match_target') or subject.get('enterprise') or '-'}")
-    lines.append(f"- 匹配方式：{caliber.get('match_type') or '-'}")
-    lines.append(f"- 数据范围：{caliber.get('data_scope') or '-'}")
-    lines.append(f"- 局限说明：{caliber.get('limit') or '-'}\n")
+    _NUMERALS = ("一", "二", "三", "四", "五", "六", "七", "八")
+    _number = 0
 
-    if metrics:
-        lines.append("## 二、数据总览\n")
-        lines.append("| 指标 | 数值 | 说明 |")
-        lines.append("| --- | --- | --- |")
-        for m in metrics:
-            if isinstance(m, dict):
-                lines.append(f"| {m.get('label','')} | {m.get('value','-')} | {m.get('hint','')} |")
+    def _heading(label: str) -> str:
+        nonlocal _number
+        heading = f"## {_NUMERALS[_number]}、{label}\n"
+        _number += 1
+        return heading
+
+    caliber_lines = []
+    match_target = (caliber.get("match_target") or subject.get("enterprise")
+                    or subject.get("matchKeyword") or subject.get("match_raw"))
+    for label, value in (
+        ("匹配对象", match_target),
+        ("匹配方式", caliber.get("match_type")),
+        ("数据范围", caliber.get("data_scope")),
+        ("局限说明", caliber.get("limit")),
+    ):
+        if has_data(value):
+            caliber_lines.append(f"- {label}：{text(value)}")
+    if caliber_lines:
+        lines.append(_heading("查询对象与口径"))
+        lines.extend(caliber_lines)
         lines.append("")
 
-    lines.append("## 三、核心分析\n")
-    for spec in sections:
-        key = spec.get("key")
-        body = core.get(key)
-        kind = spec.get("kind")
-        if kind == "text":
-            if compact(body):
-                lines.append(f"### {spec.get('title', key)}\n")
-                if spec.get("note"):
-                    lines.append(f"_{spec['note']}_\n")
-                lines.append(f"{compact(body, limit=1500)}\n")
-        elif kind == "tags":
-            items = tag_items(body)
-            if items:
-                lines.append(f"### {spec.get('title', key)}\n")
-                if spec.get("note"):
-                    lines.append(f"_{spec['note']}_\n")
-                lines.extend(f"- {html.escape(item, quote=False)}" for item in items)
-                lines.append("")
-        elif kind == "kv" and isinstance(body, dict) and body:
-            lines.append(f"### {spec.get('title', key)}\n")
-            if spec.get("note"):
-                lines.append(f"_{spec['note']}_\n")
-            lines.append("| 字段 | 内容 |")
-            lines.append("| --- | --- |")
-            for k, v in body.items():
-                if v not in (None, "", [], {}):
-                    lines.append(f"| {k} | {text(v)} |")
+    if metrics:
+            lines.append(_heading("数据总览"))
+            lines.append(md_table(metrics, [("label", "指标"), ("value", "数值"), ("hint", "说明")]))
             lines.append("")
-        elif kind == "table":
-            rows = [r for r in as_list(body) if isinstance(r, dict)]
-            if rows:
-                lines.append(f"### {spec.get('title', key)}\n")
-                if spec.get("note"):
-                    lines.append(f"_{spec['note']}_\n")
-                cols = spec.get("columns") or [(k, k) for k in rows[0].keys()]
-                lines.append(md_table(rows, cols))
+
+    core_start = len(lines)
+    if sections:
+        lines.append(_heading("核心分析"))
+        for spec in sections:
+            key = str(spec.get("key") or "")
+            body = core.get(key)
+            kind = spec.get("kind")
+            rows = clean_rows(as_list(body), spec.get("columns")) if kind in ("table", "line", "bar", "pie", "donut", "multi_line") or kind is None else []
+            block: List[str] = []
+            if kind == "text":
+                body_text = compact(body, limit=1500)
+                if has_data(body_text):
+                    block.append(body_text)
+            elif kind == "tags":
+                items = tag_items(body)
+                if items:
+                    block.extend(f"- {html.escape(item, quote=False)}" for item in items)
+            elif kind == "kv":
+                items = [(k, v) for k, v in body.items() if has_data(v)] if isinstance(body, dict) else []
+                if items:
+                                    block.append(md_table([{"字段": k, "内容": v} for k, v in items],
+                                                          [("字段", "字段"), ("内容", "内容")]))
+            elif kind == "table":
+                if rows:
+                    block.append(md_table(rows, spec.get("columns") or _normalize_columns(rows, None)))
+            if block:
+                            lines.append(f"### {esc(spec.get('title', key))}\n")
+                            note_text = _section_note_text(spec.get("note"), rows)
+                            if has_data(note_text):
+                                lines.append(f"_{note_text}_\n")
+                            lines.extend(block)
+                            lines.append("")
+        if len(lines) == core_start + 1:
+            del lines[core_start:]
+            _number -= 1
 
     if records:
-        lines.append("## 四、代表性记录\n")
-        recs = [r for r in records if isinstance(r, dict)]
-        if recs:
-            cols = [(k, k) for k in recs[0].keys()]
-            lines.append(md_table(recs, cols))
+        lines.append(_heading("代表性记录"))
+        lines.append(md_table(records, _normalize_columns(records, None)))
 
     if insights:
-        lines.append("## 五、特征与洞察\n")
+        lines.append(_heading("特征与洞察"))
         for item in insights:
-            if isinstance(item, dict):
-                lines.append(f"### {item.get('feature','')}")
-                lines.append(f"- 证据：{item.get('evidence','')}")
-                lines.append(f"- 解读：{item.get('interpretation','')}\n")
+            feature = item.get("feature")
+            if has_data(feature):
+                lines.append(f"### {esc(feature)}")
+            evidence = item.get("evidence")
+            if has_data(evidence):
+                lines.append(f"- 证据：{text(evidence)}")
+            interpretation = item.get("interpretation")
+            if has_data(interpretation):
+                lines.append(f"- 解读：{text(interpretation)}")
+            lines.append("")
 
-    lines.append("## 六、数据口径与来源\n")
-    lines.append(f"- 数据来源：{ds.get('mcp_server','-')}")
-    lines.append(f"- 生成时间：{ds.get('generated_at','-')}")
-    lines.append(f"- 模式：{'Dry-run 样例' if ds.get('dry_run') else '真实查询'}")
+    source_lines = []
+    if has_data(ds.get("mcp_server")):
+        source_lines.append(f"- 数据来源：{text(ds.get('mcp_server'))}")
+    if has_data(ds.get("generated_at")):
+        source_lines.append(f"- 生成时间：{text(ds.get('generated_at'))}")
+    if has_data(ds.get("blocked_reason")):
+        source_lines.append(f"- 失败原因：{text(ds.get('blocked_reason'))}")
+    tool_errors = tag_items(ds.get("tool_errors"))
+    if tool_errors:
+        source_lines.append(f"- 数据缺口：{'、'.join(tool_errors)}")
+    if "dry_run" in ds and has_data(ds.get("dry_run")):
+        source_lines.append(f"- 模式：{'Dry-run 样例' if ds.get('dry_run') else '真实查询'}")
+    if source_lines:
+        lines.append(_heading("数据口径与来源"))
+        lines.extend(source_lines)
     return "\n".join(lines)
 
 
